@@ -9,6 +9,7 @@
 #include <vtkPolyData.h>
 #include <vtkPoints.h>
 #include <vtkXMLPolyDataReader.h>
+#include <vtkSmartPointer.h>
 
 int main (int argc, char** argv)
 {
@@ -34,8 +35,8 @@ int main (int argc, char** argv)
   pcl::PointCloud<pcl::PointXYZ> cloud;
 
   // Fill in the cloud data
-  cloud.width    = reader->GetOutput()->GetNumberOfPoints();
-  cloud.height   = 1; // This indicates that the point cloud is unorganized
+  cloud.width = reader->GetOutput()->GetNumberOfPoints();
+  cloud.height = 1; // This indicates that the point cloud is unorganized
   cloud.is_dense = false;
   cloud.points.resize (cloud.width);
 
