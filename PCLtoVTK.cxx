@@ -9,6 +9,7 @@
 #include <vtkPolyData.h>
 #include <vtkPoints.h>
 #include <vtkXMLPolyDataWriter.h>
+#include <vtkSmartPointer.h>
 
 int main (int argc, char*argv[])
 {
@@ -48,11 +49,13 @@ int main (int argc, char*argv[])
   polydata->SetPoints(points);
  
   // Write the file
-  vtkSmartPointer<vtkXMLPolyDataWriter> writer =  
+  vtkSmartPointer<vtkXMLPolyDataWriter> writer =
     vtkSmartPointer<vtkXMLPolyDataWriter>::New();
-  writer->SetFileName("test.vtp");
+  writer->SetFileName(outputFileName.c_str());
   writer->SetInputConnection(polydata->GetProducerPort());
   writer->Write();
   
   return EXIT_SUCCESS;
 }
+
+
