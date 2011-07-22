@@ -11,6 +11,35 @@
 #include <vtkXMLPolyDataWriter.h>
 #include <vtkSmartPointer.h>
 
+
+template <> void
+insertPoints<pcl::PointXYZRGB> (pcl::PointCloud<pcl::PointXYZI>::Ptr& cloud, vtkSmartPointer<vtkPolyData>& pts) 
+{
+  for (size_t i = 0; i < cloud->points.size (); ++i)
+    {
+    pts->InsertNextPoint ( cloud->points[i].x, cloud->points[i].y, cloud->points[i].z, cloud->points[i].rgb);
+    }
+}
+
+template <> void
+insertPoints<pcl::PointXYZRGBNormal> (pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr& cloud, vtkSmartPointer<vtkPolyData>& pts)
+{
+  for (size_t i = 0; i < cloud->points.size (); ++i)
+    {
+    pts->InsertNextPoint ( cloud->points[i].x, cloud->points[i].y, cloud->points[i].z, cloud->points[i].rgb, 
+						   cloud->points[i].normal_x, cloud->points[i].normal_y, cloud->points[i].normal_z);
+    }
+}
+
+template <typename PointT> void
+insertPoints (pcl::PointCloud<PointT>::Ptr& cloud, vtkSmartPointer<vtkPolyData>& pts)
+{
+ for (size_t i = 0; i < cloud->points.size (); ++i)
+    {
+    pts->InsertNextPoint ( cloud->points[i].x, cloud->points[i].y, cloud->points[i].z );
+    }
+}
+
 int main (int argc, char*argv[])
 {
   // Verify arguments
@@ -29,6 +58,7 @@ int main (int argc, char*argv[])
   
   // Read the PCD file
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+  std::cout << pcl::getFieldsList<pcl::PointXYZ>(*cloud);
 
   if (pcl::io::loadPCDFile<pcl::PointXYZ> (inputFileName.c_str(), *cloud) == -1) //* load the file
   {
@@ -39,10 +69,7 @@ int main (int argc, char*argv[])
   // Construct the VTK data
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
 
-  for (size_t i = 0; i < cloud->points.size (); ++i)
-    {
-    points->InsertNextPoint ( cloud->points[i].x, cloud->points[i].y, cloud->points[i].z );
-    }
+  insertPoints(cloud, points);
  
   // Create a polydata object and add the points to it.
   vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
@@ -57,5 +84,3 @@ int main (int argc, char*argv[])
   
   return EXIT_SUCCESS;
 }
-
-
