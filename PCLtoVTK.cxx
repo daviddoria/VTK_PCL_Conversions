@@ -42,7 +42,7 @@ int main (int argc, char*argv[])
 
   for (size_t i = 0; i < cloud->points.size (); ++i)
     {
-    points->InsertNextPoint ( cloud->points[i].x, cloud->points[i].y, cloud->points[i].z, cloud->points[i].rgb);
+    //points->InsertNextPoint ( cloud->points[i].x, cloud->points[i].y, cloud->points[i].z, cloud->points[i].rgb);
     }
  
   // Create a polydata object and add the points to it.
