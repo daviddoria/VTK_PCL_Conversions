@@ -7,10 +7,12 @@
 #include <pcl/point_types.h>
 
 // VTK
+#include <vtkFloatArray.h>
 #include <vtkPolyData.h>
+#include <vtkPointData.h>
 #include <vtkPoints.h>
-#include <vtkXMLPolyDataWriter.h>
 #include <vtkSmartPointer.h>
+#include <vtkXMLPolyDataWriter.h>
 
 //Some shorthand notation
 typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr          ColorCloudPtr;
@@ -20,14 +22,14 @@ typedef vtkSmartPointer<vtkPolyData>                    VTKPolyDataPtr;
 
 //Template function declarations for inserting points of arbitrary dimension
 template <typename PointT> 
-void insertPoints (pcl::PointCloud<PointT>::Ptr& cloud, VTKPointsPtr& pts, VTKPolyDataPtr& pdata)
+void insertPoints (typename pcl::PointCloud<PointT>::Ptr& cloud, VTKPointsPtr& pts, VTKPolyDataPtr& pdata)
 {
  for (size_t i = 0; i < cloud->points.size (); ++i)
     {
     pts->InsertNextPoint ( cloud->points[i].x, cloud->points[i].y, cloud->points[i].z );
     }
   //Add the points to the polydata
-  pdata->setPoints(pts);
+  pdata->SetPoints(pts);
 }
 
 //Specialization for points with RGB values
@@ -44,8 +46,8 @@ void insertPoints<pcl::PointXYZRGB> (ColorCloudPtr& cloud, VTKPointsPtr& pts, VT
 	rgbs->InsertNextValue(cloud->points[i].rgb);
     }
   //Add points to the polydata and add the RGB array to it
-  pdata->setPoints(pts);
-  pdata->GetPointData->AddArray(rgbs);
+  pdata->SetPoints(pts);
+  pdata->GetPointData()->AddArray(rgbs);
 }
 
 //Specialization for points with RGB values and normals
@@ -68,9 +70,9 @@ void insertPoints<pcl::PointXYZRGBNormal> (ColorCloudNormalPtr& cloud, VTKPoints
     normals->SetTuple(i, norm_tuple);
     }
   //Add the points to the polydata and add the RGB array and normals to it
-  pdata->setPoints(pts);
-  pdata->GetPointData->AddArray(rgbs);
-  pdata->GetPointData->SetNormals(normals);
+  pdata->SetPoints(pts);
+  pdata->GetPointData()->AddArray(rgbs);
+  pdata->GetPointData()->SetNormals(normals);
 }
 
 int main (int argc, char*argv[])
