@@ -9,8 +9,9 @@
 // VTK
 #include <vtkPolyData.h>
 #include <vtkPoints.h>
-#include <vtkXMLPolyDataWriter.h>
 #include <vtkSmartPointer.h>
+#include <vtkVertexGlyphFilter.h>
+#include <vtkXMLPolyDataWriter.h>
 
 //Some shorthand notation
 typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr          ColorCloudPtr;
@@ -101,17 +102,22 @@ int main (int argc, char*argv[])
 
   // Construct the VTK data
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-  // Create a polydata object and add the points to it.
-  vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
-  /*polydata->SetPoints(points);*/
-
   insertPoints(cloud, points);
  
+  // Create a polydata object, add the points to it, and add a vertex to each point
+  vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
+  polydata->SetPoints(points);
+  
+  vtkSmartPointer<vtkVertexGlyphFilter> vertexGlyphFilter =
+    vtkSmartPointer<vtkVertexGlyphFilter>::New();
+  vertexGlyphFilter->AddInputConnection(polydata->GetProducerPort());
+  vertexGlyphFilter->Update();
+  
   // Write the file
   vtkSmartPointer<vtkXMLPolyDataWriter> writer =
     vtkSmartPointer<vtkXMLPolyDataWriter>::New();
   writer->SetFileName(outputFileName.c_str());
-  writer->SetInputConnection(polydata->GetProducerPort());
+  writer->SetInputConnection(vertexGlyphFilter->GetOutputPort());
   writer->Write();
   
   return EXIT_SUCCESS;
