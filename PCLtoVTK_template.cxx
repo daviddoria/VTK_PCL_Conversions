@@ -22,7 +22,7 @@ typedef vtkSmartPointer<vtkPolyData>                    VTKPolyDataPtr;
 
 //Template function declarations for inserting points of arbitrary dimension
 template <typename PointT> 
-void insertPoints (typename pcl::PointCloud<PointT>::Ptr cloud, VTKPolyDataPtr pdata)
+void PCLtoVTK(typename pcl::PointCloud<PointT>::Ptr cloud, VTKPolyDataPtr pdata)
 {
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
   for (size_t i = 0; i < cloud->points.size (); ++i)
@@ -35,7 +35,7 @@ void insertPoints (typename pcl::PointCloud<PointT>::Ptr cloud, VTKPolyDataPtr p
 
 //Specialization for points with RGB values
 template <>
-void insertPoints<pcl::PointXYZRGB> (ColorCloudPtr cloud, VTKPolyDataPtr pdata)  
+void PCLtoVTK<pcl::PointXYZRGB> (ColorCloudPtr cloud, VTKPolyDataPtr pdata)  
 {
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkFloatArray> rgbs = vtkSmartPointer<vtkFloatArray>::New();
@@ -54,7 +54,7 @@ void insertPoints<pcl::PointXYZRGB> (ColorCloudPtr cloud, VTKPolyDataPtr pdata)
 
 //Specialization for points with RGB values and normals
 template <> 
-void insertPoints<pcl::PointXYZRGBNormal> (ColorCloudNormalPtr cloud, VTKPolyDataPtr pdata)
+void PCLtoVTK<pcl::PointXYZRGBNormal> (ColorCloudNormalPtr cloud, VTKPolyDataPtr pdata)
 {
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkFloatArray> rgbs = vtkSmartPointer<vtkFloatArray>::New();
@@ -106,9 +106,8 @@ int main (int argc, char*argv[])
 
   // Create a polydata object and add the points to it.
   vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
-  /*polydata->SetPoints(points);*/
 
-  insertPoints<pcl::PointXYZ>(cloud, polydata);
+  PCLtoVTK<pcl::PointXYZ>(cloud, polydata);
  
   // Write the file
   vtkSmartPointer<vtkXMLPolyDataWriter> writer =
