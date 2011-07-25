@@ -86,6 +86,7 @@ This document presents a set of simple conversions between the Point Cloud Libra
   PointXYZ & vtkPoints\\
   PointXYZRGB & vtkPoints + vtkUnsignedCharArray \\
   PointXYZRGBNormal & vtkPoints + vtkUnsignedCharArray + vtkFloatArray\\
+  PointNormal & vtkPoints + vtkFloatArray\\
 \end{tabular}
 
 \end{center}
@@ -93,11 +94,30 @@ This document presents a set of simple conversions between the Point Cloud Libra
 
 %%%%%%%%%%%%%%%%%%%%
 \section{VTK to PCD}
+We provide a simple, templated interface to the conversions function.
+\begin{verbatim}
+template <typename PointT> 
+void VTKtoPCL(vtkPolyData* pdata, typename pcl::PointCloud<PointT>::Ptr cloud)
+\end{verbatim}
 
+The generic template takes any vtkPolyData point-only pcl::PointCloud. This generic template handles the case of PointXYZ. Specializations handle the cases of PointXYZRGB, PointXYZRGBNormal, and PointNormal by additionally adding the extra attributes to the PointT struct.
 
 \subsection{Code Snippet}
 
 \begin{verbatim}
+  // Read the VTP file
+  vtkSmartPointer<vtkXMLPolyDataReader> reader = vtkSmartPointer<vtkXMLPolyDataReader>::New();
+  reader->SetFileName(inputFileName.c_str());
+  reader->Update();
+  
+  // Create the output point cloud
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+
+  // Convert the data
+  VTKtoPCL<pcl::PointXYZ>(reader->GetOutput(), cloud);
+ 
+  // Save the output
+  pcl::io::savePCDFileASCII (outputFileName.c_str(), *cloud);
 \end{verbatim}
 
 %%%%%%%%%%%%%%%%%%%%
@@ -105,10 +125,10 @@ This document presents a set of simple conversions between the Point Cloud Libra
 We provide a simple, templated interface to the conversions function.
 \begin{verbatim}
 template <typename PointT> 
-void insertPoints (typename pcl::PointCloud<PointT>::Ptr cloud, vtkPolyData* pdata)
+void PCLtoVTK(typename pcl::PointCloud<PointT>::Ptr cloud, vtkPolyData* pdata)
 \end{verbatim}
 
-The generic template takes any PCL point struct that has .x, .y, and .z members available and converts it to a point-only vtkPolyData. This generic template handles the case of PointXYZ. Two specializations handle the cases of PointXYZRGB and PointXYZRGBNormal by additionally adding the extra attributes to the vtkPolyData.
+The generic template takes any PCL point struct that has .x, .y, and .z members available and converts it to a point-only vtkPolyData. This generic template handles the case of PointXYZ. Specializations handle the cases of PointXYZRGB, PointXYZRGBNormal, and PointNormal by additionally adding the extra attributes to the vtkPolyData.
 
 \subsection{Code Snippet}
 
@@ -122,6 +142,14 @@ The generic template takes any PCL point struct that has .x, .y, and .z members 
 
   // Convert the PCL data to VTK data
   PCLtoVTK<pcl::PointXYZ>(cloud, polydata);
+
+  // Write the output
+  vtkSmartPointer<vtkXMLPolyDataWriter> writer =
+    vtkSmartPointer<vtkXMLPolyDataWriter>::New();
+  writer->SetFileName(outputFileName.c_str());
+  writer->SetInputConnection(polydata->GetProducerPort());
+  writer->Write();
+  
 \end{verbatim}
 
 
