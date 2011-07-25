@@ -34,7 +34,7 @@ int main (int argc, char** argv)
   reader->SetFileName(inputFileName.c_str());
   reader->Update();
   
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
   VTKtoPCL<pcl::PointXYZ>(reader->GetOutput(), cloud);
  
