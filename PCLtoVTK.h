@@ -1,3 +1,6 @@
+#ifndef PCLtoVTK_H
+#define PCLtoVTK_H
+
 // STL
 #include <iostream>
 #include <vector>
@@ -12,12 +15,14 @@
 #include <vtkPointData.h>
 #include <vtkPoints.h>
 #include <vtkSmartPointer.h>
+#include <vtkUnsignedCharArray.h>
 #include <vtkVertexGlyphFilter.h>
 #include <vtkXMLPolyDataWriter.h>
 
 //Some shorthand notation
-typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr          ColorCloudPtr;
-typedef pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr    ColorCloudNormalPtr;
+typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr          CloudPointColorPtr;
+typedef pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr    CloudPointColorNormalPtr;
+typedef pcl::PointCloud<pcl::PointNormal>::Ptr          CloudPointNormalPtr;
 typedef vtkSmartPointer<vtkPoints>                      VTKPointsPtr;
 typedef vtkSmartPointer<vtkPolyData>                    VTKPolyDataPtr;
 
@@ -46,23 +51,29 @@ void PCLtoVTK(typename pcl::PointCloud<PointT>::Ptr cloud, VTKPolyDataPtr pdata)
 
 //Specialization for points with RGB values
 template <>
-void PCLtoVTK<pcl::PointXYZRGB> (ColorCloudPtr cloud, VTKPolyDataPtr pdata)  
+void PCLtoVTK<pcl::PointXYZRGB> (CloudPointColorPtr cloud, VTKPolyDataPtr pdata)  
 {
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-  vtkSmartPointer<vtkFloatArray> rgbs = vtkSmartPointer<vtkFloatArray>::New();
-  rgbs->SetNumberOfComponents(1);
-  rgbs->SetName("RGB");
+  
+  vtkSmartPointer<vtkUnsignedCharArray> colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
+  colors->SetNumberOfComponents(3);
+  colors->SetNumberOfTuples(cloud->points.size());
+  colors->SetName("RGB");
 
   for (size_t i = 0; i < cloud->points.size (); ++i)
     {
     points->InsertNextPoint ( cloud->points[i].x, cloud->points[i].y, cloud->points[i].z);
-	rgbs->InsertNextValue(cloud->points[i].rgb);
+  
+    unsigned char color[3] = {static_cast<unsigned char>(cloud->points[i].data_c[0]),
+			      static_cast<unsigned char>(cloud->points[i].data_c[1]),
+			      static_cast<unsigned char>(cloud->points[i].data_c[2])};
+    colors->SetTupleValue(i, color);
     }
     
   // Add points to the points to a temporary polydata
   vtkSmartPointer<vtkPolyData> tempPolyData = vtkSmartPointer<vtkPolyData>::New();
   tempPolyData->SetPoints(points);
-  tempPolyData->GetPointData()->SetScalars(rgbs);
+  tempPolyData->GetPointData()->SetScalars(colors);
 
   vtkSmartPointer<vtkVertexGlyphFilter> vertexGlyphFilter = vtkSmartPointer<vtkVertexGlyphFilter>::New();
   vertexGlyphFilter->AddInputConnection(tempPolyData->GetProducerPort());
@@ -73,29 +84,36 @@ void PCLtoVTK<pcl::PointXYZRGB> (ColorCloudPtr cloud, VTKPolyDataPtr pdata)
 
 //Specialization for points with RGB values and normals
 template <> 
-void PCLtoVTK<pcl::PointXYZRGBNormal> (ColorCloudNormalPtr cloud, VTKPolyDataPtr pdata)
+void PCLtoVTK<pcl::PointXYZRGBNormal> (CloudPointColorNormalPtr cloud, VTKPolyDataPtr pdata)
 {
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-  vtkSmartPointer<vtkFloatArray> rgbs = vtkSmartPointer<vtkFloatArray>::New();
-  rgbs->SetNumberOfComponents(1);
-  rgbs->SetName("RGB");
+  vtkSmartPointer<vtkUnsignedCharArray> colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
+  colors->SetNumberOfComponents(3);
+  colors->SetNumberOfTuples(cloud->points.size());
+  colors->SetName("RGB");
 
   vtkSmartPointer<vtkFloatArray> normals = vtkSmartPointer<vtkFloatArray>::New();
   normals->SetNumberOfComponents(3); //3d normals (ie x,y,z)
   normals->SetNumberOfTuples(cloud->points.size());
-
+  normals->SetName("Normals");
+  
   for (size_t i = 0; i < cloud->points.size (); ++i)
     {
     points->InsertNextPoint ( cloud->points[i].x, cloud->points[i].y, cloud->points[i].z);
-    rgbs->InsertNextValue(cloud->points[i].rgb);
-    float norm_tuple[3] = {cloud->points[i].normal_x, cloud->points[i].normal_y, cloud->points[i].normal_z};
-    normals->SetTuple(i, norm_tuple);
+  
+    unsigned char color[3] = {static_cast<unsigned char>(cloud->points[i].data_c[0]),
+                              static_cast<unsigned char>(cloud->points[i].data_c[1]),
+                              static_cast<unsigned char>(cloud->points[i].data_c[2])};
+    colors->SetTupleValue(i, color);
+    
+    float normal[3] = {cloud->points[i].normal_x, cloud->points[i].normal_y, cloud->points[i].normal_z};
+    normals->SetTupleValue(i, normal);
     }
     
   // Add the points to a temporary polydata
   vtkSmartPointer<vtkPolyData> tempPolyData = vtkSmartPointer<vtkPolyData>::New();
   tempPolyData->SetPoints(points);
-  tempPolyData->GetPointData()->SetScalars(rgbs);
+  tempPolyData->GetPointData()->SetScalars(colors);
   tempPolyData->GetPointData()->SetNormals(normals);
   
   vtkSmartPointer<vtkVertexGlyphFilter> vertexGlyphFilter = vtkSmartPointer<vtkVertexGlyphFilter>::New();
@@ -105,43 +123,36 @@ void PCLtoVTK<pcl::PointXYZRGBNormal> (ColorCloudNormalPtr cloud, VTKPolyDataPtr
   pdata->ShallowCopy(vertexGlyphFilter->GetOutput());
 }
 
-int main (int argc, char*argv[])
+
+//Specialization for points with normals only
+template <> 
+void PCLtoVTK<pcl::PointNormal> (CloudPointNormalPtr cloud, VTKPolyDataPtr pdata)
 {
-  // Verify arguments
-  if(argc < 3)
+  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+  
+  vtkSmartPointer<vtkFloatArray> normals = vtkSmartPointer<vtkFloatArray>::New();
+  normals->SetNumberOfComponents(3); //3d normals (ie x,y,z)
+  normals->SetNumberOfTuples(cloud->points.size());
+  normals->SetName("Normals");
+
+  for (size_t i = 0; i < cloud->points.size (); ++i)
     {
-    std::cerr << "Required arguments: input.pcd output.vtp" << std::endl;
-    return EXIT_FAILURE;
+    points->InsertNextPoint ( cloud->points[i].x, cloud->points[i].y, cloud->points[i].z);
+    
+    float normal[3] = {cloud->points[i].normal_x, cloud->points[i].normal_y, cloud->points[i].normal_z};
+    normals->SetTupleValue(i, normal);
     }
-
-  // Parse arguments
-  std::string inputFileName = argv[1];
-  std::string outputFileName = argv[2];
+    
+  // Add the points to a temporary polydata
+  vtkSmartPointer<vtkPolyData> tempPolyData = vtkSmartPointer<vtkPolyData>::New();
+  tempPolyData->SetPoints(points);
+  tempPolyData->GetPointData()->SetNormals(normals);
   
-  // Output arguments
-  std::cout << "Reading " << inputFileName << " and writing " << outputFileName << std::endl;
+  vtkSmartPointer<vtkVertexGlyphFilter> vertexGlyphFilter = vtkSmartPointer<vtkVertexGlyphFilter>::New();
+  vertexGlyphFilter->AddInputConnection(tempPolyData->GetProducerPort());
+  vertexGlyphFilter->Update();
   
-  // Read the PCD file
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
-  std::cout << pcl::getFieldsList<pcl::PointXYZ>(*cloud);
-
-  if (pcl::io::loadPCDFile<pcl::PointXYZ> (inputFileName.c_str(), *cloud) == -1) //* load the file
-  {
-    PCL_ERROR ("Couldn't read file \n");
-    return EXIT_FAILURE;
-  }
-
-  // Create a polydata object and add the points to it.
-  vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
-
-  PCLtoVTK<pcl::PointXYZ>(cloud, polydata);
- 
-  // Write the file
-  vtkSmartPointer<vtkXMLPolyDataWriter> writer =
-    vtkSmartPointer<vtkXMLPolyDataWriter>::New();
-  writer->SetFileName(outputFileName.c_str());
-  writer->SetInputConnection(polydata->GetProducerPort());
-  writer->Write();
-  
-  return EXIT_SUCCESS;
+  pdata->ShallowCopy(vertexGlyphFilter->GetOutput());
 }
+
+#endif

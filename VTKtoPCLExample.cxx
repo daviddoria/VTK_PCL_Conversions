@@ -11,6 +11,8 @@
 #include <vtkXMLPolyDataReader.h>
 #include <vtkSmartPointer.h>
 
+#include "VTKtoPCL.h"
+
 int main (int argc, char** argv)
 {
   // Verify arguments
@@ -32,24 +34,11 @@ int main (int argc, char** argv)
   reader->SetFileName(inputFileName.c_str());
   reader->Update();
   
-  pcl::PointCloud<pcl::PointXYZ> cloud;
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud;
 
-  // Fill in the cloud data
-  cloud.width = reader->GetOutput()->GetNumberOfPoints();
-  cloud.height = 1; // This indicates that the point cloud is unorganized
-  cloud.is_dense = false;
-  cloud.points.resize (cloud.width);
-
-  for (size_t i = 0; i < cloud.points.size (); ++i)
-  {
-    double p[3];
-    reader->GetOutput()->GetPoint(i,p);
-    cloud.points[i].x = p[0];
-    cloud.points[i].y = p[1];
-    cloud.points[i].z = p[2];
-  }
-
-  pcl::io::savePCDFileASCII (outputFileName.c_str(), cloud);
+  VTKtoPCL<pcl::PointXYZ>(reader->GetOutput(), cloud);
+ 
+  pcl::io::savePCDFileASCII (outputFileName.c_str(), *cloud);
 
   return EXIT_SUCCESS;
 }

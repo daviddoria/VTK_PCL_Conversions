@@ -1,5 +1,6 @@
 // STL
 #include <iostream>
+#include <vector>
 
 // PCL
 #include <pcl/io/pcd_io.h>
@@ -7,9 +8,11 @@
 
 // VTK
 #include <vtkPolyData.h>
-#include <vtkPoints.h>
-#include <vtkXMLPolyDataWriter.h>
 #include <vtkSmartPointer.h>
+#include <vtkXMLPolyDataReader.h>
+#include <vtkXMLPolyDataWriter.h>
+
+#include "PCLtoVTK.h"
 
 int main (int argc, char*argv[])
 {
@@ -37,17 +40,10 @@ int main (int argc, char*argv[])
     return EXIT_FAILURE;
   }
 
-  // Construct the VTK data
-  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-
-  for (size_t i = 0; i < cloud->points.size (); ++i)
-    {
-    //points->InsertNextPoint ( cloud->points[i].x, cloud->points[i].y, cloud->points[i].z, cloud->points[i].rgb);
-    }
- 
   // Create a polydata object and add the points to it.
   vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
-  polydata->SetPoints(points);
+
+  PCLtoVTK<pcl::PointXYZ>(cloud, polydata);
  
   // Write the file
   vtkSmartPointer<vtkXMLPolyDataWriter> writer =
