@@ -12,6 +12,7 @@
 #include <vtkPointData.h>
 #include <vtkPoints.h>
 #include <vtkSmartPointer.h>
+#include <vtkVertexGlyphFilter.h>
 #include <vtkXMLPolyDataWriter.h>
 
 //Some shorthand notation
@@ -24,13 +25,23 @@ typedef vtkSmartPointer<vtkPolyData>                    VTKPolyDataPtr;
 template <typename PointT> 
 void PCLtoVTK(typename pcl::PointCloud<PointT>::Ptr cloud, VTKPolyDataPtr pdata)
 {
+  // This generic template will convert any PCL point type with .x, .y, and .z members
+  // to a coordinate-only vtkPolyData.
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
   for (size_t i = 0; i < cloud->points.size (); ++i)
     {
     points->InsertNextPoint ( cloud->points[i].x, cloud->points[i].y, cloud->points[i].z );
     }
-    //Add the points to the polydata
-    pdata->SetPoints(points);
+    
+  // Create a temporary PolyData and add the points to it
+  vtkSmartPointer<vtkPolyData> tempPolyData = vtkSmartPointer<vtkPolyData>::New();
+  tempPolyData->SetPoints(points);
+    
+  vtkSmartPointer<vtkVertexGlyphFilter> vertexGlyphFilter = vtkSmartPointer<vtkVertexGlyphFilter>::New();
+  vertexGlyphFilter->AddInputConnection(tempPolyData->GetProducerPort());
+  vertexGlyphFilter->Update();
+  
+  pdata->ShallowCopy(vertexGlyphFilter->GetOutput());
 }
 
 //Specialization for points with RGB values
@@ -47,9 +58,17 @@ void PCLtoVTK<pcl::PointXYZRGB> (ColorCloudPtr cloud, VTKPolyDataPtr pdata)
     points->InsertNextPoint ( cloud->points[i].x, cloud->points[i].y, cloud->points[i].z);
 	rgbs->InsertNextValue(cloud->points[i].rgb);
     }
-  //Add points to the polydata and add the RGB array to it
-  pdata->SetPoints(points);
-  pdata->GetPointData()->AddArray(rgbs);
+    
+  // Add points to the points to a temporary polydata
+  vtkSmartPointer<vtkPolyData> tempPolyData = vtkSmartPointer<vtkPolyData>::New();
+  tempPolyData->SetPoints(points);
+  tempPolyData->GetPointData()->AddArray(rgbs);
+
+  vtkSmartPointer<vtkVertexGlyphFilter> vertexGlyphFilter = vtkSmartPointer<vtkVertexGlyphFilter>::New();
+  vertexGlyphFilter->AddInputConnection(tempPolyData->GetProducerPort());
+  vertexGlyphFilter->Update();
+  
+  pdata->ShallowCopy(vertexGlyphFilter->GetOutput());
 }
 
 //Specialization for points with RGB values and normals
@@ -72,10 +91,18 @@ void PCLtoVTK<pcl::PointXYZRGBNormal> (ColorCloudNormalPtr cloud, VTKPolyDataPtr
     float norm_tuple[3] = {cloud->points[i].normal_x, cloud->points[i].normal_y, cloud->points[i].normal_z};
     normals->SetTuple(i, norm_tuple);
     }
-  //Add the points to the polydata and add the RGB array and normals to it
-  pdata->SetPoints(points);
-  pdata->GetPointData()->AddArray(rgbs);
-  pdata->GetPointData()->SetNormals(normals);
+    
+  // Add the points to a temporary polydata
+  vtkSmartPointer<vtkPolyData> tempPolyData = vtkSmartPointer<vtkPolyData>::New();
+  tempPolyData->SetPoints(points);
+  tempPolyData->GetPointData()->AddArray(rgbs);
+  tempPolyData->GetPointData()->SetNormals(normals);
+  
+  vtkSmartPointer<vtkVertexGlyphFilter> vertexGlyphFilter = vtkSmartPointer<vtkVertexGlyphFilter>::New();
+  vertexGlyphFilter->AddInputConnection(tempPolyData->GetProducerPort());
+  vertexGlyphFilter->Update();
+  
+  pdata->ShallowCopy(vertexGlyphFilter->GetOutput());
 }
 
 int main (int argc, char*argv[])
