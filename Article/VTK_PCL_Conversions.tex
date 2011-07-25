@@ -64,7 +64,10 @@ colorlinks,linkcolor={blue},citecolor={blue},urlcolor={blue},
 This document presents a set of simple conversions between the Point Cloud Library's PCD file format and the Visualization Toolkit's VTP file format.
 
 The code is available here:
-https://github.com/daviddoria/VTK_PCL_Conversions
+\begin{verbatim}
+https://github.com/daviddoria/VTK_PCL_Conversions 
+\end{verbatim}
+
 
 \end{abstract}
 
@@ -73,10 +76,24 @@ https://github.com/daviddoria/VTK_PCL_Conversions
 \tableofcontents
 %%%%%%%%%%%%%%%%%%%%
 \section{Introduction}
-This document presents a set of simple conversions between the Point Cloud Library's PCD file format and the Visualization Toolkit's VTP file format.
+This document presents a set of simple conversions between the Point Cloud Library's (PCL) Point Cloud Data (PCD) file format and the Visualization Toolkit's (VTK) PolyData (VTP) file format. In PCL, point clouds are represented as a collection of coordinates along with optional additional attributes. PCL provides some standard sets of attributes in the form of structs that include PointXYZ for coordinate-only points, PointXYZRGB for colored points, and PointXYZRGBNormal for colored points with associated normal vectors. In VTK, these different data attributes are not explicitly grouped, but rather one can add any number of any type of attribute to the base coordinate data. That is, for simple coordinate-only points, a vtkPolyData objects only containing a vtkPoints is used. For colored points, a vtkPoints object with an associated vtkUnsignedCharArray is used. For colored points with associated normal vectors, a vtkPoints object with associated vtkUnsignedCharArray for the colors and a vtkFloatArray for the normals is used. These equivalent representations are summarized in the table below.
+
+\begin{center}
+ 
+\begin{tabular}{ l | l }
+  PCL & VTK\\
+  \hline
+  PointXYZ & vtkPoints\\
+  PointXYZRGB & vtkPoints + vtkUnsignedCharArray \\
+  PointXYZRGBNormal & vtkPoints + vtkUnsignedCharArray + vtkFloatArray\\
+\end{tabular}
+
+\end{center}
+
 
 %%%%%%%%%%%%%%%%%%%%
 \section{VTK to PCD}
+
 
 \subsection{Code Snippet}
 
@@ -85,10 +102,26 @@ This document presents a set of simple conversions between the Point Cloud Libra
 
 %%%%%%%%%%%%%%%%%%%%
 \section{PCD to VTK}
+We provide a simple, templated interface to the conversions function.
+\begin{verbatim}
+template <typename PointT> 
+void insertPoints (typename pcl::PointCloud<PointT>::Ptr cloud, vtkPolyData* pdata)
+\end{verbatim}
+
+The generic template takes any PCL point struct that has .x, .y, and .z members available and converts it to a point-only vtkPolyData. This generic template handles the case of PointXYZ. Two specializations handle the cases of PointXYZRGB and PointXYZRGBNormal by additionally adding the extra attributes to the vtkPolyData.
 
 \subsection{Code Snippet}
 
 \begin{verbatim}
+  // Load the PCL PCD file
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::io::loadPCDFile<pcl::PointXYZ> (inputFileName.c_str(), *cloud);
+
+  // Create a polydata object.
+  vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
+
+  // Convert the PCL data to VTK data
+  PCLtoVTK<pcl::PointXYZ>(cloud, polydata);
 \end{verbatim}
 
 
