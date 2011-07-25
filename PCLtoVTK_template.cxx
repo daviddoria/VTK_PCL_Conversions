@@ -62,7 +62,7 @@ void PCLtoVTK<pcl::PointXYZRGB> (ColorCloudPtr cloud, VTKPolyDataPtr pdata)
   // Add points to the points to a temporary polydata
   vtkSmartPointer<vtkPolyData> tempPolyData = vtkSmartPointer<vtkPolyData>::New();
   tempPolyData->SetPoints(points);
-  tempPolyData->GetPointData()->AddArray(rgbs);
+  tempPolyData->GetPointData()->SetScalars(rgbs);
 
   vtkSmartPointer<vtkVertexGlyphFilter> vertexGlyphFilter = vtkSmartPointer<vtkVertexGlyphFilter>::New();
   vertexGlyphFilter->AddInputConnection(tempPolyData->GetProducerPort());
@@ -95,7 +95,7 @@ void PCLtoVTK<pcl::PointXYZRGBNormal> (ColorCloudNormalPtr cloud, VTKPolyDataPtr
   // Add the points to a temporary polydata
   vtkSmartPointer<vtkPolyData> tempPolyData = vtkSmartPointer<vtkPolyData>::New();
   tempPolyData->SetPoints(points);
-  tempPolyData->GetPointData()->AddArray(rgbs);
+  tempPolyData->GetPointData()->SetScalars(rgbs);
   tempPolyData->GetPointData()->SetNormals(normals);
   
   vtkSmartPointer<vtkVertexGlyphFilter> vertexGlyphFilter = vtkSmartPointer<vtkVertexGlyphFilter>::New();
