@@ -68,9 +68,9 @@ void VTKtoPCL<pcl::PointXYZRGB> (vtkPolyData* polydata, CloudPointColorPtr cloud
     // Setup colors
     unsigned char color[3];
     colors->GetTupleValue(i,color);
-    cloud->points[i].data_c[0] = color[0];
-    cloud->points[i].data_c[1] = color[1];
-    cloud->points[i].data_c[2] = color[2];
+    cloud->points[i].r = color[0];
+    cloud->points[i].g = color[1];
+    cloud->points[i].b = color[2];
     }
 }
 
