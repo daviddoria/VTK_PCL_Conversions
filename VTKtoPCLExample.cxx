@@ -18,7 +18,7 @@ int main (int argc, char** argv)
   // Verify arguments
   if(argc < 2)
     {
-    std::cerr << "Required arguments: input.pcd [input2.pcd input3.pcd ... inputN.pcd]" << std::endl;
+    std::cerr << "Required arguments: input.vtp [input2.vtp input3.vtp ... inputN.vtp]" << std::endl;
     return EXIT_FAILURE;
     }
 

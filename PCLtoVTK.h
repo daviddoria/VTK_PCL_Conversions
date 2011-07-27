@@ -64,9 +64,9 @@ void PCLtoVTK<pcl::PointXYZRGB> (CloudPointColorPtr cloud, VTKPolyDataPtr pdata)
     {
     points->InsertNextPoint ( cloud->points[i].x, cloud->points[i].y, cloud->points[i].z);
   
-    unsigned char color[3] = {static_cast<unsigned char>(cloud->points[i].data_c[0]),
-			      static_cast<unsigned char>(cloud->points[i].data_c[1]),
-			      static_cast<unsigned char>(cloud->points[i].data_c[2])};
+    unsigned char color[3] = {static_cast<unsigned char>(cloud->points[i].r),
+			      static_cast<unsigned char>(cloud->points[i].g),
+			      static_cast<unsigned char>(cloud->points[i].b)};
     colors->SetTupleValue(i, color);
     }
     
