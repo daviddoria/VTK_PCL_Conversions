@@ -32,7 +32,7 @@ int main (int argc, char*argv[])
   
   // Read the PCD file
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
-  std::cout << pcl::getFieldsList<pcl::PointXYZ>(*cloud);
+  std::cout << pcl::getFieldsList<pcl::PointXYZ>(*cloud) << std::endl;
 
   if (pcl::io::loadPCDFile<pcl::PointXYZ> (inputFileName.c_str(), *cloud) == -1) //* load the file
   {
