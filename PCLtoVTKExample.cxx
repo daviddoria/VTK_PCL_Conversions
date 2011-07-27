@@ -29,15 +29,9 @@ int main (int argc, char*argv[])
   for (int i = 1; i < argc; ++i) {
     std::cout << "Reading " << argv[i] << " and writing " << argv[i] << ".vtp" << std::endl;
   
-<<<<<<< HEAD
     // Read the PCD file
     pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
     std::cout << pcl::getFieldsList<pcl::PointXYZ>(*cloud) << std::endl;
-=======
-  // Read the PCD file
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
-  std::cout << pcl::getFieldsList<pcl::PointXYZ>(*cloud) << std::endl;
->>>>>>> 6868c2ae3fa87ab33e11ff8bd6fb0e76beb11207
 
     if (pcl::io::loadPCDFile<pcl::PointXYZ> (argv[i], *cloud) == -1) //* load the file
     {
