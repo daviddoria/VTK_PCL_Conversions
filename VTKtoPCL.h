@@ -4,6 +4,7 @@
 // PCL
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
+#include <pcl/PolygonMesh.h>
 
 // VTK
 #include <vtkFloatArray.h>
@@ -20,6 +21,8 @@ typedef pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr    CloudPointColorNormalPtr
 typedef pcl::PointCloud<pcl::PointNormal>::Ptr          CloudPointNormalPtr;
 typedef vtkSmartPointer<vtkPoints>                      VTKPointsPtr;
 typedef vtkSmartPointer<vtkPolyData>                    VTKPolyDataPtr;
+
+int PolyDataToPolygonMesh(vtkPolyData* polyData, pcl::PolygonMesh &polygonMesh);
 
 //Template function declarations for inserting points of arbitrary dimension
 template <typename PointT> 

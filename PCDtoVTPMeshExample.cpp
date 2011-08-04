@@ -12,7 +12,7 @@
 #include <vtkXMLPolyDataWriter.h>
 #include <vtkSmartPointer.h>
 
-#include "VTKtoPCL.h"
+#include "PCLtoVTK.h"
 
 int main (int argc, char** argv)
 {
@@ -38,7 +38,7 @@ int main (int argc, char** argv)
   }
   
   vtkSmartPointer<vtkPolyData> polyData = vtkSmartPointer<vtkPolyData>::New();
-  int result = PolygonMeshToPolyData(polygonMesh, polyData);
+  int result = PolygonMeshToPolyData(mesh, polyData);
   
   // Read the VTP file
   vtkSmartPointer<vtkXMLPolyDataWriter> writer = vtkSmartPointer<vtkXMLPolyDataWriter>::New();
