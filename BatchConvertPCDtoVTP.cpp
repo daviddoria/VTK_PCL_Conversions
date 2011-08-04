@@ -26,7 +26,8 @@ int main (int argc, char*argv[])
   std::vector<std::string> input_files;
 
   // Parse and output arguments
-  for (int i = 1; i < argc; ++i) {
+  for (int i = 1; i < argc; ++i) 
+  {
     std::cout << "Reading " << argv[i] << " and writing " << argv[i] << ".vtp" << std::endl;
   
     // Read the PCD file

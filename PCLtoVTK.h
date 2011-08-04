@@ -29,7 +29,7 @@ typedef pcl::PointCloud<pcl::PointNormal>::Ptr          CloudPointNormalPtr;
 typedef vtkSmartPointer<vtkPoints>                      VTKPointsPtr;
 typedef vtkSmartPointer<vtkPolyData>                    VTKPolyDataPtr;
 
-int PolygonMeshToPolyData(const pcl::PolygonMesh &triangles);
+int PolygonMeshToPolyData(const pcl::PolygonMesh &triangles, vtkPolyData* polyData);
 
 //Template function declarations for inserting points of arbitrary dimension
 template <typename PointT> 

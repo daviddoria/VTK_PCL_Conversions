@@ -1,0 +1,14 @@
+This project converts point clouds and meshes between VTK formats and PCL formats.
+
+Point Clouds
+------------
+vtkPolyData <-> pcl::PointCloud
+
+Meshes
+------
+vtkPolyData <-> pcl::PolygonMesh
+
+The conversions are provided in PCLtoVTK.h/cpp and VTKtoPCL.h/cpp.
+
+Drivers are provided to demonstrate the conversions. The files are named PCD instead of PCL and VTP
+instead of VTK because these are the specific file types we are reading and writing in the examples.
