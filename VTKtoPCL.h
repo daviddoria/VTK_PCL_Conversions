@@ -16,17 +16,22 @@
 #include <vtkXMLPolyDataReader.h>
 
 //Some shorthand notation
-typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr          CloudPointColorPtr;
-typedef pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr    CloudPointColorNormalPtr;
+typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr          CloudPointXYZRGBPtr;
+typedef pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr    CloudPointXYZRGBNormalPtr;
 typedef pcl::PointCloud<pcl::PointNormal>::Ptr          CloudPointNormalPtr;
+
+typedef pcl::PointCloud<pcl::PointXYZRGB>          CloudPointXYZRGBType;
+typedef pcl::PointCloud<pcl::PointXYZRGBNormal>    CloudPointXYZRGBNormalType;
+typedef pcl::PointCloud<pcl::PointNormal>          CloudPointNormalType;
+
 typedef vtkSmartPointer<vtkPoints>                      VTKPointsPtr;
 typedef vtkSmartPointer<vtkPolyData>                    VTKPolyDataPtr;
 
 int PolyDataToPolygonMesh(vtkPolyData* polyData, pcl::PolygonMesh &polygonMesh);
 
 //Template function declarations for inserting points of arbitrary dimension
-template <typename PointT> 
-void VTKtoPCL(vtkPolyData* polydata, typename pcl::PointCloud<PointT>::Ptr cloud)
+template <typename CloudT>
+void VTKtoPCL(vtkPolyData* polydata, CloudT* cloud)
 {
   // This generic template will convert any VTK PolyData
   // to a coordinate-only PointXYZ PCL format.
@@ -49,7 +54,7 @@ void VTKtoPCL(vtkPolyData* polydata, typename pcl::PointCloud<PointT>::Ptr cloud
 
 //Specialization for points with RGB values
 template <>
-void VTKtoPCL<pcl::PointXYZRGB> (vtkPolyData* polydata, CloudPointColorPtr cloud)
+void VTKtoPCL<CloudPointXYZRGBType> (vtkPolyData* polydata, CloudPointXYZRGBType* cloud)
 {
   vtkUnsignedCharArray* colors = 
     vtkUnsignedCharArray::SafeDownCast(polydata->GetPointData()->GetNormals());
@@ -78,7 +83,7 @@ void VTKtoPCL<pcl::PointXYZRGB> (vtkPolyData* polydata, CloudPointColorPtr cloud
 }
 
 template <> 
-void VTKtoPCL<pcl::PointXYZRGBNormal> (vtkPolyData* polydata, CloudPointColorNormalPtr cloud)
+void VTKtoPCL<CloudPointXYZRGBNormalType> (vtkPolyData* polydata, CloudPointXYZRGBNormalType* cloud)
 {
   vtkFloatArray* normals = 
     vtkFloatArray::SafeDownCast(polydata->GetPointData()->GetNormals());
@@ -118,7 +123,7 @@ void VTKtoPCL<pcl::PointXYZRGBNormal> (vtkPolyData* polydata, CloudPointColorNor
 
 
 template <> 
-void VTKtoPCL<pcl::PointNormal> (vtkPolyData* polydata, CloudPointNormalPtr cloud)
+void VTKtoPCL<CloudPointNormalType> (vtkPolyData* polydata, CloudPointNormalType* cloud)
 {
   vtkFloatArray* normals = vtkFloatArray::SafeDownCast(polydata->GetPointData()->GetNormals());
     

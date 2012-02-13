@@ -26,18 +26,23 @@
 typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr          CloudPointColorPtr;
 typedef pcl::PointCloud<pcl::PointXYZRGBNormal>::Ptr    CloudPointColorNormalPtr;
 typedef pcl::PointCloud<pcl::PointNormal>::Ptr          CloudPointNormalPtr;
+
+typedef pcl::PointCloud<pcl::PointXYZRGB>         CloudPointXYZRGBType;
+typedef pcl::PointCloud<pcl::PointXYZRGBNormal>   CloudPointXYZRGBNormalType;
+typedef pcl::PointCloud<pcl::PointNormal>         CloudPointNormalType;
+
 typedef vtkSmartPointer<vtkPoints>                      VTKPointsPtr;
 typedef vtkSmartPointer<vtkPolyData>                    VTKPolyDataPtr;
 
 int PolygonMeshToPolyData(const pcl::PolygonMesh &triangles, vtkPolyData* polyData);
 
 //Template function declarations for inserting points of arbitrary dimension
-template <typename PointT> 
-void PCLtoVTK(typename pcl::PointCloud<PointT>::Ptr cloud, VTKPolyDataPtr pdata)
+template <typename CloudT>
+void PCLtoVTK(CloudT* cloud, VTKPolyDataPtr pdata)
 {
   // This generic template will convert any PCL point type with .x, .y, and .z members
   // to a coordinate-only vtkPolyData.
-  //vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+  std::cout << "Generic" << std::endl;
   vtkPoints* points = vtkPoints::New();
   for (size_t i = 0; i < cloud->points.size (); ++i)
     {
@@ -49,7 +54,7 @@ void PCLtoVTK(typename pcl::PointCloud<PointT>::Ptr cloud, VTKPolyDataPtr pdata)
     p[2] = cloud->points[i].z;
     points->InsertNextPoint ( p);
     }
-    
+
   // Create a temporary PolyData and add the points to it
   vtkSmartPointer<vtkPolyData> tempPolyData = vtkSmartPointer<vtkPolyData>::New();
   tempPolyData->SetPoints(points);
@@ -57,9 +62,17 @@ void PCLtoVTK(typename pcl::PointCloud<PointT>::Ptr cloud, VTKPolyDataPtr pdata)
   vtkSmartPointer<vtkVertexGlyphFilter> vertexGlyphFilter = vtkSmartPointer<vtkVertexGlyphFilter>::New();
   vertexGlyphFilter->AddInputConnection(tempPolyData->GetProducerPort());
   vertexGlyphFilter->Update();
-  
-  pdata->ShallowCopy(vertexGlyphFilter->GetOutput());
+
+  pdata->DeepCopy(vertexGlyphFilter->GetOutput());
 }
 
+template <>
+void PCLtoVTK<CloudPointXYZRGBType> (CloudPointXYZRGBType* cloud, VTKPolyDataPtr pdata);
+
+template <>
+void PCLtoVTK<CloudPointXYZRGBNormalType> (CloudPointXYZRGBNormalType* cloud, VTKPolyDataPtr pdata);
+
+template <>
+void PCLtoVTK<CloudPointNormalType> (CloudPointNormalType* cloud, VTKPolyDataPtr pdata);
 
 #endif

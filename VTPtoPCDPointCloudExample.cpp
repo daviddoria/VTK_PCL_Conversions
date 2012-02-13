@@ -18,29 +18,25 @@ int main (int argc, char** argv)
   // Verify arguments
   if(argc < 3)
     {
-    std::cerr << "Required arguments: input.vtp [input2.vtp input3.vtp ... inputN.vtp]" << std::endl;
+    std::cerr << "Required arguments: input.vtp output.pcd" << std::endl;
     return EXIT_FAILURE;
     }
 
-  std::vector<std::string> input_files;
-  
-  // Parse and output arguments
-  for (int i = 1; i < argc; ++i) {
-    std::cout << "Reading " << argv[i] << " and writing " << argv[i] << ".pcd" << std::endl;
-  
-    // Read the VTP file
-    vtkSmartPointer<vtkXMLPolyDataReader> reader = vtkSmartPointer<vtkXMLPolyDataReader>::New();
-    reader->SetFileName(argv[i]);
-    reader->Update();
-  
-    pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+  std::string inputVTP = argv[1];
+  std::string outputPCD = argv[2];
 
-    VTKtoPCL<pcl::PointXYZ>(reader->GetOutput(), cloud);
+  std::cout << "Reading " << inputVTP << " and writing " << outputPCD << ".pcd" << std::endl;
 
-    std::string outputFileName = argv[i];
-    outputFileName += ".pcd";
- 
-    pcl::io::savePCDFileASCII (outputFileName.c_str(), *cloud);
-  }
+  // Read the VTP file
+  vtkSmartPointer<vtkXMLPolyDataReader> reader = vtkSmartPointer<vtkXMLPolyDataReader>::New();
+  reader->SetFileName(inputVTP.c_str());
+  reader->Update();
+
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+
+  VTKtoPCL(reader->GetOutput(), cloud.get());
+
+  pcl::io::savePCDFileASCII (outputPCD.c_str(), *cloud);
+
   return EXIT_SUCCESS;
 }

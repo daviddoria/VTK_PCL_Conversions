@@ -43,11 +43,11 @@ int main (int argc, char*argv[])
     // Create a polydata object and add the points to it.
     vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
 
-    PCLtoVTK<pcl::PointXYZ>(cloud, polydata);
+    PCLtoVTK(cloud.get(), polydata);
  
     // Write the file
     vtkSmartPointer<vtkXMLPolyDataWriter> writer =
-    vtkSmartPointer<vtkXMLPolyDataWriter>::New();
+      vtkSmartPointer<vtkXMLPolyDataWriter>::New();
 
     std::string outputFileName = argv[i];
     outputFileName += ".vtp";

@@ -68,8 +68,9 @@ int PolygonMeshToPolyData(const pcl::PolygonMesh& polygonMesh, vtkPolyData* poly
 
 //Specialization for points with RGB values
 template <>
-void PCLtoVTK<pcl::PointXYZRGB> (CloudPointColorPtr cloud, VTKPolyDataPtr pdata)
+void PCLtoVTK<CloudPointXYZRGBType> (CloudPointXYZRGBType* cloud, VTKPolyDataPtr pdata)
 {
+  std::cout << "PointXYZRGB" << std::endl;
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
 
   vtkSmartPointer<vtkUnsignedCharArray> colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
@@ -96,13 +97,14 @@ void PCLtoVTK<pcl::PointXYZRGB> (CloudPointColorPtr cloud, VTKPolyDataPtr pdata)
   vertexGlyphFilter->AddInputConnection(tempPolyData->GetProducerPort());
   vertexGlyphFilter->Update();
 
-  pdata->ShallowCopy(vertexGlyphFilter->GetOutput());
+  pdata->DeepCopy(vertexGlyphFilter->GetOutput());
 }
 
 //Specialization for points with RGB values and normals
 template <>
-void PCLtoVTK<pcl::PointXYZRGBNormal> (CloudPointColorNormalPtr cloud, VTKPolyDataPtr pdata)
+void PCLtoVTK<CloudPointXYZRGBNormalType> (CloudPointXYZRGBNormalType* cloud, VTKPolyDataPtr pdata)
 {
+  std::cout << "PointXYZRGBNormal" << std::endl;
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
   vtkSmartPointer<vtkUnsignedCharArray> colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
   colors->SetNumberOfComponents(3);
@@ -137,14 +139,15 @@ void PCLtoVTK<pcl::PointXYZRGBNormal> (CloudPointColorNormalPtr cloud, VTKPolyDa
   vertexGlyphFilter->AddInputConnection(tempPolyData->GetProducerPort());
   vertexGlyphFilter->Update();
 
-  pdata->ShallowCopy(vertexGlyphFilter->GetOutput());
+  pdata->DeepCopy(vertexGlyphFilter->GetOutput());
 }
 
 
 //Specialization for points with normals only
 template <>
-void PCLtoVTK<pcl::PointNormal> (CloudPointNormalPtr cloud, VTKPolyDataPtr pdata)
+void PCLtoVTK<CloudPointNormalType> (CloudPointNormalType* cloud, VTKPolyDataPtr pdata)
 {
+  std::cout << "PointNormal" << std::endl;
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
 
   vtkSmartPointer<vtkFloatArray> normals = vtkSmartPointer<vtkFloatArray>::New();
@@ -169,5 +172,5 @@ void PCLtoVTK<pcl::PointNormal> (CloudPointNormalPtr cloud, VTKPolyDataPtr pdata
   vertexGlyphFilter->AddInputConnection(tempPolyData->GetProducerPort());
   vertexGlyphFilter->Update();
 
-  pdata->ShallowCopy(vertexGlyphFilter->GetOutput());
+  pdata->DeepCopy(vertexGlyphFilter->GetOutput());
 }
