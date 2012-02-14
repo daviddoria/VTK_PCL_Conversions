@@ -47,7 +47,7 @@ INSTALL( TARGETS BatchConvertVTPtoPCD RUNTIME DESTINATION ${INSTALL_DIR} )
 ######### Instantiations #########
 # Instantiate all of the possible template functions even if they are not used in real examples
 # to make sure there are no compiler errors.
-ADD_EXECUTABLE(TestInstantiate TestInstantiate.cxx PCLtoVTK.cpp)
+ADD_EXECUTABLE(TestInstantiate TestInstantiate.cxx PCLtoVTK.cpp VTKtoPCL.cpp)
 TARGET_LINK_LIBRARIES(TestInstantiate ${VTK_LIBRARIES} ${PCL_LIBRARIES})
 
 ADD_EXECUTABLE(TestPCDtoVTP TestPCDtoVTP.cpp PCLtoVTK.cpp)

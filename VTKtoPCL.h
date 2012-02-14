@@ -28,7 +28,7 @@ typedef vtkSmartPointer<vtkPolyData>                    VTKPolyDataPtr;
 
 //Template function declarations for inserting points of arbitrary dimension
 template <typename CloudT>
-void VTKtoPCL(vtkPolyData* polydata, CloudT* cloud)
+void VTKtoPCL(vtkPolyData* const polydata, CloudT* const cloud)
 {
   // This generic template will convert any VTK PolyData
   // to a coordinate-only PointXYZ PCL format.
@@ -48,8 +48,20 @@ void VTKtoPCL(vtkPolyData* polydata, CloudT* cloud)
     }
 }
 
+// Points and normals
+template <> 
+void VTKtoPCL<CloudPointNormalType> (vtkPolyData* const polydata, CloudPointNormalType* const cloud);
+
+// Points and colors
+template <>
+void VTKtoPCL<CloudPointXYZRGBType> (vtkPolyData* const polydata, CloudPointXYZRGBType* const cloud);
+
+// Points, normals, and colors
+template <> 
+void VTKtoPCL<CloudPointXYZRGBNormalType> (vtkPolyData* const polydata, CloudPointXYZRGBNormalType* const cloud);
+
 template <typename CloudT>
-void VTKtoPCL(vtkStructuredGrid* structuredGrid, CloudT* cloud)
+void VTKtoPCL(vtkStructuredGrid* const structuredGrid, CloudT* const cloud)
 {
   // This generic template will convert a vtkStructuredGrid
   // to a coordinate-only PointXYZ PCL format.
@@ -85,103 +97,8 @@ void VTKtoPCL(vtkStructuredGrid* structuredGrid, CloudT* cloud)
   }
 }
 
-
-//Specialization for points with RGB values
+// Points, normals, and colors
 template <>
-void VTKtoPCL<CloudPointXYZRGBType> (vtkPolyData* polydata, CloudPointXYZRGBType* cloud)
-{
-  vtkUnsignedCharArray* colors = 
-    vtkUnsignedCharArray::SafeDownCast(polydata->GetPointData()->GetNormals());
-    
-  cloud->width = polydata->GetNumberOfPoints();
-  cloud->height = 1; // This indicates that the point cloud is unorganized
-  cloud->is_dense = false;
-  cloud->points.resize(cloud->width);
-
-  for (size_t i = 0; i < cloud->points.size (); ++i)
-    {
-    // Setup points
-    double p[3];
-    polydata->GetPoint(i,p);
-    cloud->points[i].x = p[0];
-    cloud->points[i].y = p[1];
-    cloud->points[i].z = p[2];
-  
-    // Setup colors
-    unsigned char color[3];
-    colors->GetTupleValue(i,color);
-    cloud->points[i].r = color[0];
-    cloud->points[i].g = color[1];
-    cloud->points[i].b = color[2];
-    }
-}
-
-template <> 
-void VTKtoPCL<CloudPointXYZRGBNormalType> (vtkPolyData* polydata, CloudPointXYZRGBNormalType* cloud)
-{
-  vtkFloatArray* normals = 
-    vtkFloatArray::SafeDownCast(polydata->GetPointData()->GetNormals());
-    
-  vtkUnsignedCharArray* colors = 
-    vtkUnsignedCharArray::SafeDownCast(polydata->GetPointData()->GetNormals());
-    
-  cloud->width = polydata->GetNumberOfPoints();
-  cloud->height = 1; // This indicates that the point cloud is unorganized
-  cloud->is_dense = false;
-  cloud->points.resize(cloud->width);
-
-  for (size_t i = 0; i < cloud->points.size (); ++i)
-    {
-    // Setup points
-    double p[3];
-    polydata->GetPoint(i,p);
-    cloud->points[i].x = p[0];
-    cloud->points[i].y = p[1];
-    cloud->points[i].z = p[2];
-  
-    // Setup colors
-    unsigned char color[3];
-    colors->GetTupleValue(i,color);
-    cloud->points[i].data_c[0] = color[0];
-    cloud->points[i].data_c[1] = color[1];
-    cloud->points[i].data_c[2] = color[2];
-  
-    // Setup normals
-    float normal[3];
-    normals->GetTupleValue(i,normal);
-    cloud->points[i].normal_x = normal[0];
-    cloud->points[i].normal_y = normal[1];
-    cloud->points[i].normal_z = normal[2];
-    }
-}
-
-
-template <> 
-void VTKtoPCL<CloudPointNormalType> (vtkPolyData* polydata, CloudPointNormalType* cloud)
-{
-  vtkFloatArray* normals = vtkFloatArray::SafeDownCast(polydata->GetPointData()->GetNormals());
-    
-  cloud->width = polydata->GetNumberOfPoints();
-  cloud->height = 1; // This indicates that the point cloud is unorganized
-  cloud->is_dense = false;
-  cloud->points.resize(cloud->width);
-
-  for (size_t i = 0; i < cloud->points.size (); ++i)
-    {
-    // Setup points
-    double p[3];
-    polydata->GetPoint(i,p);
-    cloud->points[i].x = p[0];
-    cloud->points[i].y = p[1];
-    cloud->points[i].z = p[2];
-  
-    // Setup normals
-    float normal[3];
-    normals->GetTupleValue(i,normal);
-    cloud->points[i].normal_x = normal[0];
-    cloud->points[i].normal_y = normal[1];
-    cloud->points[i].normal_z = normal[2];
-    }
-}
+void VTKtoPCL<CloudPointXYZRGBNormalType> (vtkStructuredGrid* const structuredGrid, CloudPointXYZRGBNormalType* const cloud);
 
 #endif
