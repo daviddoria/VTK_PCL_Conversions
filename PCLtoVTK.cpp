@@ -112,3 +112,68 @@ void PCLtoVTK<CloudPointNormalType> (CloudPointNormalType* const cloud, vtkPolyD
 
   pdata->DeepCopy(vertexGlyphFilter->GetOutput());
 }
+
+
+template <>
+void PCLtoVTK<CloudPointXYZRGBNormalType> (CloudPointXYZRGBNormalType* const cloud, vtkStructuredGrid* const structuredGrid)
+{
+  // This generic template will convert any PCL point type with .x, .y, and .z members
+  // to a coordinate-only vtkPolyData.
+  std::cout << "Generic" << std::endl;
+  
+  int dimensions[3] = {cloud->width, cloud->height, 1};
+  structuredGrid->SetDimensions(dimensions);
+
+  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+  points->SetNumberOfPoints(cloud->width * cloud->height);
+  
+  vtkSmartPointer<vtkUnsignedCharArray> colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
+  colors->SetNumberOfTuples(cloud->width * cloud->height);
+  colors->SetNumberOfComponents(3);
+  colors->SetName("Colors");
+  
+  vtkSmartPointer<vtkFloatArray> normals = vtkSmartPointer<vtkFloatArray>::New();
+  normals->SetNumberOfTuples(cloud->width * cloud->height);
+  normals->SetNumberOfComponents(3);
+  normals->SetName("Normals");
+
+  for (size_t i = 0; i < cloud->width; ++i)
+  {
+    for (size_t j = 0; j < cloud->height; ++j)
+    {
+      int queryPoint[3] = {i, j, 0};
+      vtkIdType pointId = vtkStructuredData::ComputePointId(dimensions, queryPoint);
+      CloudPointXYZRGBNormalType::PointType point = (*cloud)(i,j);
+      
+      if(pcl::isFinite(point))
+      {
+        float p[3] = {point.x, point.y, point.z};
+        points->SetPoint(pointId, p);
+        
+        unsigned char c[3] = {point.r, point.g, point.b};
+        colors->SetTupleValue(pointId, c);
+        
+        float n[3] = {point.normal_x, point.normal_y, point.normal_z};
+        normals->SetTupleValue(pointId, n);
+      }
+      else
+      {
+        float p[3] = {0,0,0};
+        points->SetPoint(pointId, p);
+        
+        unsigned char c[3] = {0,0,0};
+        colors->SetTupleValue(pointId, c);
+        
+        float n[3] = {0,0,0};
+        normals->SetTupleValue(pointId, n);
+        
+        structuredGrid->BlankPoint(pointId);
+      }
+    }
+  }
+
+  structuredGrid->SetPoints(points); 
+  structuredGrid->GetPointData()->AddArray(colors);
+  structuredGrid->GetPointData()->SetNormals(normals);
+  
+}

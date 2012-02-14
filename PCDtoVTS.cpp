@@ -30,10 +30,12 @@ int main (int argc, char*argv[])
   std::cout << "Reading " << inputFileName << " and writing " << outputFileName << std::endl;
   
   // Read the PCD file
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
-  std::cout << pcl::getFieldsList<pcl::PointXYZ>(*cloud);
+  //typedef pcl::PointCloud<pcl::PointXYZ> CloudType;
+  typedef CloudPointXYZRGBNormalType CloudType;
 
-  if (pcl::io::loadPCDFile<pcl::PointXYZ> (inputFileName.c_str(), *cloud) == -1) //* load the file
+  CloudType::Ptr cloud (new CloudType);
+
+  if (pcl::io::loadPCDFile<CloudType::PointType> (inputFileName.c_str(), *cloud) == -1) //* load the file
   {
     PCL_ERROR ("Couldn't read file \n");
     return EXIT_FAILURE;

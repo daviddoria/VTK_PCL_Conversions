@@ -53,13 +53,22 @@ void PCLtoVTK(CloudT* const cloud, vtkPolyData* const pdata)
   // Create a temporary PolyData and add the points to it
   vtkSmartPointer<vtkPolyData> tempPolyData = vtkSmartPointer<vtkPolyData>::New();
   tempPolyData->SetPoints(points);
-    
+
   vtkSmartPointer<vtkVertexGlyphFilter> vertexGlyphFilter = vtkSmartPointer<vtkVertexGlyphFilter>::New();
   vertexGlyphFilter->AddInputConnection(tempPolyData->GetProducerPort());
   vertexGlyphFilter->Update();
 
   pdata->DeepCopy(vertexGlyphFilter->GetOutput());
 }
+
+template <>
+void PCLtoVTK<CloudPointXYZRGBType> (CloudPointXYZRGBType* const cloud, vtkPolyData* const pdata);
+
+template <>
+void PCLtoVTK<CloudPointXYZRGBNormalType> (CloudPointXYZRGBNormalType* const cloud, vtkPolyData* const pdata);
+
+template <>
+void PCLtoVTK<CloudPointNormalType> (CloudPointNormalType* const cloud, vtkPolyData* const pdata);
 
 //Template function declarations for inserting points of arbitrary dimension
 template <typename CloudT>
@@ -102,12 +111,6 @@ void PCLtoVTK(CloudT* const cloud, vtkStructuredGrid* const structuredGrid)
 }
 
 template <>
-void PCLtoVTK<CloudPointXYZRGBType> (CloudPointXYZRGBType* const cloud, vtkPolyData* const pdata);
-
-template <>
-void PCLtoVTK<CloudPointXYZRGBNormalType> (CloudPointXYZRGBNormalType* const cloud, vtkPolyData* const pdata);
-
-template <>
-void PCLtoVTK<CloudPointNormalType> (CloudPointNormalType* const cloud, vtkPolyData* const pdata);
+void PCLtoVTK<CloudPointXYZRGBNormalType> (CloudPointXYZRGBNormalType* const cloud, vtkStructuredGrid* const structuredGrid);
 
 #endif
