@@ -9,7 +9,6 @@
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
 #include <pcl/pcl_base.h>
-#include <pcl/PolygonMesh.h>
 #include <pcl/common/common.h>
 
 // VTK
@@ -18,6 +17,7 @@
 #include <vtkPointData.h>
 #include <vtkPoints.h>
 #include <vtkSmartPointer.h>
+#include <vtkStructuredGrid.h>
 #include <vtkUnsignedCharArray.h>
 #include <vtkVertexGlyphFilter.h>
 #include <vtkXMLPolyDataWriter.h>
@@ -31,19 +31,14 @@ typedef pcl::PointCloud<pcl::PointXYZRGB>         CloudPointXYZRGBType;
 typedef pcl::PointCloud<pcl::PointXYZRGBNormal>   CloudPointXYZRGBNormalType;
 typedef pcl::PointCloud<pcl::PointNormal>         CloudPointNormalType;
 
-typedef vtkSmartPointer<vtkPoints>                      VTKPointsPtr;
-typedef vtkSmartPointer<vtkPolyData>                    VTKPolyDataPtr;
-
-int PolygonMeshToPolyData(const pcl::PolygonMesh &triangles, vtkPolyData* polyData);
-
 //Template function declarations for inserting points of arbitrary dimension
 template <typename CloudT>
-void PCLtoVTK(CloudT* cloud, VTKPolyDataPtr pdata)
+void PCLtoVTK(CloudT* const cloud, vtkPolyData* const pdata)
 {
   // This generic template will convert any PCL point type with .x, .y, and .z members
   // to a coordinate-only vtkPolyData.
   std::cout << "Generic" << std::endl;
-  vtkPoints* points = vtkPoints::New();
+  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
   for (size_t i = 0; i < cloud->points.size (); ++i)
     {
     std::cout << cloud->points[i].x << " " << cloud->points[i].y << " " <<  cloud->points[i].z << std::endl;
@@ -66,13 +61,52 @@ void PCLtoVTK(CloudT* cloud, VTKPolyDataPtr pdata)
   pdata->DeepCopy(vertexGlyphFilter->GetOutput());
 }
 
-template <>
-void PCLtoVTK<CloudPointXYZRGBType> (CloudPointXYZRGBType* cloud, VTKPolyDataPtr pdata);
+//Template function declarations for inserting points of arbitrary dimension
+template <typename CloudT>
+void PCLtoVTK(CloudT* const cloud, vtkStructuredGrid* const structuredGrid)
+{
+  // This generic template will convert any PCL point type with .x, .y, and .z members
+  // to a coordinate-only vtkPolyData.
+  std::cout << "Generic" << std::endl;
+  
+  int dimensions[3] = {cloud->width, cloud->height, 1};
+  structuredGrid->SetDimensions(dimensions);
+
+  vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+
+  for (size_t i = 0; i < cloud->width; ++i)
+  {
+    for (size_t j = 0; j < cloud->height; ++j)
+    {
+      int queryPoint[3] = {i, j, 0};
+      vtkIdType pointId = vtkStructuredData::ComputePointId(dimensions, queryPoint);
+      typename CloudT::PointType point = (*cloud)(i,j);
+      
+      if(pcl::isFinite(point))
+      {
+        float p[3] = {point.x, point.y, point.z};
+        points->SetPoint(pointId, p);
+      }
+      else
+      {
+        float p[3] = {0,0,0};
+        points->SetPoint(pointId, p);
+        structuredGrid->BlankPoint(pointId);
+      }
+    }
+  }
+
+  structuredGrid->SetPoints(points);
+
+}
 
 template <>
-void PCLtoVTK<CloudPointXYZRGBNormalType> (CloudPointXYZRGBNormalType* cloud, VTKPolyDataPtr pdata);
+void PCLtoVTK<CloudPointXYZRGBType> (CloudPointXYZRGBType* const cloud, vtkPolyData* const pdata);
 
 template <>
-void PCLtoVTK<CloudPointNormalType> (CloudPointNormalType* cloud, VTKPolyDataPtr pdata);
+void PCLtoVTK<CloudPointXYZRGBNormalType> (CloudPointXYZRGBNormalType* const cloud, vtkPolyData* const pdata);
+
+template <>
+void PCLtoVTK<CloudPointNormalType> (CloudPointNormalType* const cloud, vtkPolyData* const pdata);
 
 #endif

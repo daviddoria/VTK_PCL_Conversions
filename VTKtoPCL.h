@@ -68,10 +68,19 @@ void VTKtoPCL(vtkStructuredGrid* structuredGrid, CloudT* cloud)
       int queryPoint[3] = {i, j, 0};
       vtkIdType pointId = vtkStructuredData::ComputePointId(dimensions, queryPoint);
       double p[3];
-      structuredGrid->GetPoint(pointId, p);
-      cloud->points[i].x = p[0];
-      cloud->points[i].y = p[1];
-      cloud->points[i].z = p[2];
+      if(structuredGrid->IsPointVisible(pointId))
+      {
+        structuredGrid->GetPoint(pointId, p);
+        (*cloud)(i, j).x = p[0];
+        (*cloud)(i, j).y = p[1];
+        (*cloud)(i, j).z = p[2];
+      }
+      else
+      {
+        (*cloud)(i, j).x = std::numeric_limits< float >::quiet_NaN();
+        (*cloud)(i, j).y = std::numeric_limits< float >::quiet_NaN();
+        (*cloud)(i, j).z = std::numeric_limits< float >::quiet_NaN();
+      }
     }
   }
 }

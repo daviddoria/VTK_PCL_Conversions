@@ -4,71 +4,9 @@
 #include <vtkSmartPointer.h>
 #include <vtkTriangleFilter.h>
 
-int PolygonMeshToPolyData(const pcl::PolygonMesh& polygonMesh, vtkPolyData* polyData)
-{
-  if (polygonMesh.cloud.data.empty ())
-  {
-    PCL_ERROR ("[pcl::surface::convertToVTK] Input point cloud has no data!\n");
-    return (-1);
-  }
-  vtkSmartPointer<vtkPoints> vtk_pts = vtkSmartPointer<vtkPoints>::New ();
-
-  int nr_points  = polygonMesh.cloud.width * polygonMesh.cloud.height;
-  int point_size = polygonMesh.cloud.data.size () / nr_points;
-  for (int i = 0; i < nr_points; ++i)
-  {
-    int xyz = 0;
-    float value[3];
-    for (size_t d = 0; d < polygonMesh.cloud.fields.size (); ++d)
-    {
-      int count = polygonMesh.cloud.fields[d].count;
-      if (count == 0)
-        count = 1;
-      int c = 0;
-      if ((polygonMesh.cloud.fields[d].datatype == sensor_msgs::PointField::FLOAT32) && (
-          polygonMesh.cloud.fields[d].name == "x" ||
-          polygonMesh.cloud.fields[d].name == "y" ||
-          polygonMesh.cloud.fields[d].name == "z"))
-      {
-        memcpy (&value[xyz], &polygonMesh.cloud.data[i * point_size + polygonMesh.cloud.fields[d].offset + c * sizeof (float)], sizeof (float));
-        if (++xyz == 3)
-          break;
-      }
-    }
-    if (xyz != 3)
-    {
-      PCL_ERROR ("[pcl::io::saveVTKFile] Input point cloud has no XYZ data!\n");
-      return (-2);
-    }
-    vtk_pts->InsertPoint(i,value);
-  }
-
-  vtkSmartPointer<vtkCellArray> vtk_cells = vtkSmartPointer<vtkCellArray>::New ();
-  for (size_t i = 0; i < polygonMesh.polygons.size (); ++i)
-  {
-    vtk_cells->InsertNextCell (polygonMesh.polygons[i].vertices.size ());
-    size_t j = 0;
-    for (j = 0; j < polygonMesh.polygons[i].vertices.size (); ++j)
-      vtk_cells->InsertCellPoint (polygonMesh.polygons[i].vertices[j]);
-  }
-
-  polyData->SetPoints(vtk_pts);
-  polyData->SetPolys(vtk_cells);
-  polyData->Update();
-
-  vtkSmartPointer<vtkTriangleFilter> vtk_triangles = vtkSmartPointer<vtkTriangleFilter>::New ();
-  vtk_triangles->SetInput (polyData);
-  vtk_triangles->Update();
-
-  polyData = vtk_triangles->GetOutput ();
-
-  return 1;
-}
-
-
 //Specialization for points with RGB values
 template <>
-void PCLtoVTK<CloudPointXYZRGBType> (CloudPointXYZRGBType* cloud, VTKPolyDataPtr pdata)
+void PCLtoVTK<CloudPointXYZRGBType> (CloudPointXYZRGBType* const cloud, vtkPolyData* const pdata)
 {
   std::cout << "PointXYZRGB" << std::endl;
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
@@ -102,7 +40,7 @@ void PCLtoVTK<CloudPointXYZRGBType> (CloudPointXYZRGBType* cloud, VTKPolyDataPtr
 
 //Specialization for points with RGB values and normals
 template <>
-void PCLtoVTK<CloudPointXYZRGBNormalType> (CloudPointXYZRGBNormalType* cloud, VTKPolyDataPtr pdata)
+void PCLtoVTK<CloudPointXYZRGBNormalType> (CloudPointXYZRGBNormalType* const cloud, vtkPolyData* const pdata)
 {
   std::cout << "PointXYZRGBNormal" << std::endl;
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
@@ -145,7 +83,7 @@ void PCLtoVTK<CloudPointXYZRGBNormalType> (CloudPointXYZRGBNormalType* cloud, VT
 
 //Specialization for points with normals only
 template <>
-void PCLtoVTK<CloudPointNormalType> (CloudPointNormalType* cloud, VTKPolyDataPtr pdata)
+void PCLtoVTK<CloudPointNormalType> (CloudPointNormalType* const cloud, vtkPolyData* const pdata)
 {
   std::cout << "PointNormal" << std::endl;
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
