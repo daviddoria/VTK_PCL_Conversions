@@ -25,14 +25,16 @@ int main (int argc, char** argv)
   std::string inputVTS = argv[1];
   std::string outputPCD = argv[2];
 
-  std::cout << "Reading " << inputVTS << " and writing " << outputPCD << ".pcd" << std::endl;
+  std::cout << "Reading " << inputVTS << " and writing " << outputPCD << std::endl;
 
   // Read the VTP file
   vtkSmartPointer<vtkXMLStructuredGridReader> reader = vtkSmartPointer<vtkXMLStructuredGridReader>::New();
   reader->SetFileName(inputVTS.c_str());
   reader->Update();
 
-  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
+  //typedef pcl::PointCloud<pcl::PointXYZ> CloudType;
+  typedef pcl::PointCloud<pcl::PointXYZRGBNormal> CloudType;
+  CloudType::Ptr cloud(new CloudType);
 
   VTKtoPCL(reader->GetOutput(), cloud.get());
 

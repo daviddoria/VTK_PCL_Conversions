@@ -45,6 +45,9 @@ int main (int argc, char*argv[])
   vtkSmartPointer<vtkStructuredGrid> structuredGrid = vtkSmartPointer<vtkStructuredGrid>::New();
 
   PCLtoVTK(cloud.get(), structuredGrid);
+  
+  std::cout << "Input cloud has " << cloud->width * cloud->height << " points." << std::endl;
+  std::cout << "Output cloud has " << structuredGrid->GetNumberOfPoints() << " points." << std::endl;
  
   // Write the file
   vtkSmartPointer<vtkXMLStructuredGridWriter> writer =
