@@ -73,6 +73,7 @@ void PCLtoVTK(CloudT* const cloud, vtkStructuredGrid* const structuredGrid)
   structuredGrid->SetDimensions(dimensions);
 
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
+  points->SetNumberOfPoints(cloud->width * cloud->height);
 
   for (size_t i = 0; i < cloud->width; ++i)
   {
