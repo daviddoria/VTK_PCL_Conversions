@@ -4,16 +4,15 @@
 // PCL
 #include <pcl/io/pcd_io.h>
 #include <pcl/point_types.h>
-#include <pcl/PolygonMesh.h>
 
 // VTK
 #include <vtkFloatArray.h>
-#include <vtkPolyData.h>
 #include <vtkPointData.h>
 #include <vtkPoints.h>
-#include <vtkSmartPointer.h>
+#include <vtkPolyData.h>
 #include <vtkUnsignedCharArray.h>
-#include <vtkXMLPolyDataReader.h>
+#include <vtkSmartPointer.h>
+#include <vtkStructuredGrid.h>
 
 //Some shorthand notation
 typedef pcl::PointCloud<pcl::PointXYZRGB>::Ptr          CloudPointXYZRGBPtr;
@@ -26,8 +25,6 @@ typedef pcl::PointCloud<pcl::PointNormal>          CloudPointNormalType;
 
 typedef vtkSmartPointer<vtkPoints>                      VTKPointsPtr;
 typedef vtkSmartPointer<vtkPolyData>                    VTKPolyDataPtr;
-
-int PolyDataToPolygonMesh(vtkPolyData* polyData, pcl::PolygonMesh &polygonMesh);
 
 //Template function declarations for inserting points of arbitrary dimension
 template <typename CloudT>
@@ -49,6 +46,34 @@ void VTKtoPCL(vtkPolyData* polydata, CloudT* cloud)
     cloud->points[i].y = p[1];
     cloud->points[i].z = p[2];
     }
+}
+
+template <typename CloudT>
+void VTKtoPCL(vtkStructuredGrid* structuredGrid, CloudT* cloud)
+{
+  // This generic template will convert a vtkStructuredGrid
+  // to a coordinate-only PointXYZ PCL format.
+
+  int dimensions[3];
+  structuredGrid->GetDimensions(dimensions);
+  cloud->width = dimensions[0];
+  cloud->height = dimensions[1]; // This indicates that the point cloud is organized
+  cloud->is_dense = true;
+  cloud->points.resize(cloud->width * cloud->height);
+
+  for (size_t i = 0; i < cloud->width; ++i)
+  {
+    for (size_t j = 0; j < cloud->height; ++j)
+    {
+      int queryPoint[3] = {i, j, 0};
+      vtkIdType pointId = vtkStructuredData::ComputePointId(dimensions, queryPoint);
+      double p[3];
+      structuredGrid->GetPoint(pointId, p);
+      cloud->points[i].x = p[0];
+      cloud->points[i].y = p[1];
+      cloud->points[i].z = p[2];
+    }
+  }
 }
 
 
