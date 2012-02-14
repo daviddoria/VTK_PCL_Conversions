@@ -7,9 +7,9 @@
 #include <pcl/point_types.h>
 
 // VTK
-#include <vtkPolyData.h>
 #include <vtkSmartPointer.h>
-#include <vtkXMLPolyDataWriter.h>
+#include <vtkStructuredGrid.h>
+#include <vtkXMLStructuredGridWriter.h>
 
 #include "PCLtoVTK.h"
 
@@ -40,15 +40,15 @@ int main (int argc, char*argv[])
   }
 
   // Create a polydata object and add the points to it.
-  vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
+  vtkSmartPointer<vtkStructuredGrid> structuredGrid = vtkSmartPointer<vtkStructuredGrid>::New();
 
-  PCLtoVTK(cloud.get(), polydata);
+  PCLtoVTK(cloud.get(), structuredGrid);
  
   // Write the file
-  vtkSmartPointer<vtkXMLPolyDataWriter> writer =
-    vtkSmartPointer<vtkXMLPolyDataWriter>::New();
+  vtkSmartPointer<vtkXMLStructuredGridWriter> writer =
+    vtkSmartPointer<vtkXMLStructuredGridWriter>::New();
   writer->SetFileName(outputFileName.c_str());
-  writer->SetInputConnection(polydata->GetProducerPort());
+  writer->SetInputConnection(structuredGrid->GetProducerPort());
   writer->Write();
   
   return EXIT_SUCCESS;
