@@ -44,7 +44,7 @@ int main (int argc, char*argv[])
   // Create a polydata object and add the points to it.
   vtkSmartPointer<vtkStructuredGrid> structuredGrid = vtkSmartPointer<vtkStructuredGrid>::New();
 
-  PCLtoVTK(cloud.get(), structuredGrid);
+  PCLtoVTK(cloud.get(), structuredGrid.GetPointer());
   
   std::cout << "Input cloud has " << cloud->width * cloud->height << " points." << std::endl;
   std::cout << "Output cloud has " << structuredGrid->GetNumberOfPoints() << " points." << std::endl;
@@ -55,6 +55,7 @@ int main (int argc, char*argv[])
   writer->SetFileName(outputFileName.c_str());
   writer->SetInputConnection(structuredGrid->GetProducerPort());
   writer->Write();
-  
+
+  std::cout << "Finished." << std::endl;
   return EXIT_SUCCESS;
 }
