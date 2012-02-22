@@ -36,10 +36,10 @@ int main (int argc, char** argv)
   
   VTKPolyDataPtr polydata = VTKPolyDataPtr::New();
   
-  PCLtoVTK(cloudXYZ.get(), polydata);
-  PCLtoVTK(cloudXYZRGB.get(), polydata);
-  PCLtoVTK(cloudXYZRGBNormal.get(), polydata);
-  PCLtoVTK(cloudXYZNormal.get(), polydata);
+  PCLtoVTK(*cloudXYZ, polydata);
+  PCLtoVTK(*cloudXYZRGB, polydata);
+  PCLtoVTK(*cloudXYZRGBNormal, polydata);
+  PCLtoVTK(*cloudXYZNormal, polydata);
   
   VTKtoPCL(polydata, cloudXYZRGB.get());
   VTKtoPCL(polydata, cloudXYZ.get());

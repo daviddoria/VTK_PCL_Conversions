@@ -12,14 +12,10 @@
 #include <pcl/common/common.h>
 
 // VTK
-#include <vtkFloatArray.h>
 #include <vtkPolyData.h>
 #include <vtkPointData.h>
 #include <vtkPoints.h>
-#include <vtkSmartPointer.h>
 #include <vtkStructuredGrid.h>
-#include <vtkUnsignedCharArray.h>
-#include <vtkVertexGlyphFilter.h>
 #include <vtkXMLPolyDataWriter.h>
 
 //Some shorthand notation
@@ -31,18 +27,14 @@ typedef pcl::PointCloud<pcl::PointXYZRGB>         CloudPointXYZRGBType;
 typedef pcl::PointCloud<pcl::PointXYZRGBNormal>   CloudPointXYZRGBNormalType;
 typedef pcl::PointCloud<pcl::PointNormal>         CloudPointNormalType;
 
-// PCL to vtkPolyData
+/** This function will convert a PCL PointCloud of any point type 
+ * to a vtkPolyData. The PointCloud must have .x,.y,.z members.
+ * If the PointCloud has .x_normal, .y_normal, and .z_normal members,
+ * a Normals array will be created on the PointData. If the PointCloud
+ * has .r, .g, and .b members, a Colors array will be created on the PointData.
+ */
 template <typename CloudT>
-void PCLtoVTK(CloudT* const cloud, vtkPolyData* const pdata);
-
-template <>
-void PCLtoVTK<CloudPointXYZRGBType> (CloudPointXYZRGBType* const cloud, vtkPolyData* const pdata);
-
-template <>
-void PCLtoVTK<CloudPointXYZRGBNormalType> (CloudPointXYZRGBNormalType* const cloud, vtkPolyData* const pdata);
-
-template <>
-void PCLtoVTK<CloudPointNormalType> (CloudPointNormalType* const cloud, vtkPolyData* const pdata);
+void PCLtoVTK(const CloudT& cloud, vtkPolyData* const pdata);
 
 // PCL to vtkStructuredGrid
 template <typename CloudT>

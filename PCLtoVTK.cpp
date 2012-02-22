@@ -4,6 +4,7 @@
 #include <vtkSmartPointer.h>
 #include <vtkTriangleFilter.h>
 
+#if 0
 //Specialization for points with RGB values
 template <>
 void PCLtoVTK<CloudPointXYZRGBType> (CloudPointXYZRGBType* const cloud, vtkPolyData* const pdata)
@@ -112,6 +113,7 @@ void PCLtoVTK<CloudPointNormalType> (CloudPointNormalType* const cloud, vtkPolyD
 
   pdata->DeepCopy(vertexGlyphFilter->GetOutput());
 }
+#endif
 
 // Coordinates, colors, and normals
 template <>

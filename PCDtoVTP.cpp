@@ -42,7 +42,7 @@ int main (int argc, char*argv[])
   // Create a polydata object and add the points to it.
   vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
 
-  PCLtoVTK(cloud.get(), polydata);
+  PCLtoVTK(*cloud, polydata);
  
   // Write the file
   vtkSmartPointer<vtkXMLPolyDataWriter> writer =

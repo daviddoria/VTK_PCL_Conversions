@@ -33,7 +33,7 @@ void XYZ()
 
   vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
 
-  PCLtoVTK(cloud.get(), polydata);
+  PCLtoVTK(*cloud, polydata);
 }
 
 void XYZRGB()
@@ -43,5 +43,5 @@ void XYZRGB()
 
   vtkSmartPointer<vtkPolyData> polydata = vtkSmartPointer<vtkPolyData>::New();
 
-  PCLtoVTK(cloud.get(), polydata);
+  PCLtoVTK(*cloud, polydata);
 }
