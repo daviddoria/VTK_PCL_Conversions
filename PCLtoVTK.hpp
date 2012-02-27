@@ -4,10 +4,13 @@
 // PCL
 #include <pcl/common/common.h>
 #include <pcl/point_traits.h>
+#include <pcl/point_types.h>
 
 // VTK
 #include <vtkFloatArray.h>
+#include <vtkPointData.h>
 #include <vtkSmartPointer.h>
+#include <vtkStructuredGrid.h>
 #include <vtkUnsignedCharArray.h>
 #include <vtkVertexGlyphFilter.h>
 
@@ -84,6 +87,7 @@ void PCLtoVTK(const CloudT& cloud, vtkPolyData* const pdata)
     tempPolyData->GetPointData()->SetScalars(colors);
   }
 
+  // Add 0D topology to every point
   vtkSmartPointer<vtkVertexGlyphFilter> vertexGlyphFilter = vtkSmartPointer<vtkVertexGlyphFilter>::New();
   vertexGlyphFilter->AddInputConnection(tempPolyData->GetProducerPort());
   vertexGlyphFilter->Update();
@@ -92,27 +96,28 @@ void PCLtoVTK(const CloudT& cloud, vtkPolyData* const pdata)
 }
 
 
-//Template function declarations for inserting points of arbitrary dimension
 template <typename CloudT>
-void PCLtoVTK(CloudT* const cloud, vtkStructuredGrid* const structuredGrid)
+void PCLtoVTK(const CloudT& cloud, vtkStructuredGrid* const structuredGrid)
 {
-  // This generic template will convert any PCL point type with .x, .y, and .z members
-  // to a coordinate-only vtkPolyData.
-  std::cout << "Generic" << std::endl;
+  typename CloudT::PointType testPoint = cloud.points[0];
 
-  int dimensions[3] = {cloud->width, cloud->height, 1};
+  typedef typename pcl::traits::fieldList<typename CloudT::PointType>::type FieldList;
+  
+  int dimensions[3] = {cloud.width, cloud.height, 1};
   structuredGrid->SetDimensions(dimensions);
 
   vtkSmartPointer<vtkPoints> points = vtkSmartPointer<vtkPoints>::New();
-  points->SetNumberOfPoints(cloud->width * cloud->height);
+  points->SetNumberOfPoints(cloud.width * cloud.height);
 
-  for (size_t i = 0; i < cloud->width; ++i)
+  unsigned int numberOfInvalidPoints = 0;
+
+  for (size_t i = 0; i < cloud.width; ++i)
   {
-    for (size_t j = 0; j < cloud->height; ++j)
+    for (size_t j = 0; j < cloud.height; ++j)
     {
       int queryPoint[3] = {i, j, 0};
       vtkIdType pointId = vtkStructuredData::ComputePointId(dimensions, queryPoint);
-      typename CloudT::PointType point = (*cloud)(i,j);
+      typename CloudT::PointType point = cloud(i,j);
 
       if(pcl::isFinite(point))
       {
@@ -121,14 +126,91 @@ void PCLtoVTK(CloudT* const cloud, vtkStructuredGrid* const structuredGrid)
       }
       else
       {
-        float p[3] = {0,0,0};
-        points->SetPoint(pointId, p);
-        structuredGrid->BlankPoint(pointId);
+
       }
     }
   }
 
   structuredGrid->SetPoints(points);
+
+  // Normals (optional)
+  bool has_x_normal = false; bool has_y_normal = false; bool has_z_normal = false;
+  float x_normal_val = 0.0f; float y_normal_val = 0.0f; float z_normal_val = 0.0f;
+  pcl::for_each_type<FieldList> (pcl::CopyIfFieldExists<typename CloudT::PointType, float> (testPoint, "x_normal", has_x_normal, x_normal_val));
+  pcl::for_each_type<FieldList> (pcl::CopyIfFieldExists<typename CloudT::PointType, float> (testPoint, "y_normal", has_y_normal, y_normal_val));
+  pcl::for_each_type<FieldList> (pcl::CopyIfFieldExists<typename CloudT::PointType, float> (testPoint, "z_normal", has_z_normal, z_normal_val));
+  if(has_x_normal && has_y_normal && has_z_normal)
+  {
+    vtkSmartPointer<vtkFloatArray> normals = vtkSmartPointer<vtkFloatArray>::New();
+    normals->SetNumberOfComponents(3); // Note this must come before the SetNumberOfTuples calls
+    normals->SetNumberOfTuples(cloud.width * cloud.height);
+    normals->SetName("Normals");
+    for (size_t i = 0; i < cloud.width; ++i)
+    {
+      for (size_t j = 0; j < cloud.height; ++j)
+      {
+        int queryPoint[3] = {i, j, 0};
+        vtkIdType pointId = vtkStructuredData::ComputePointId(dimensions, queryPoint);
+        typename CloudT::PointType point = cloud(i,j);
+
+        if(pcl::isFinite(point))
+        {
+          typename CloudT::PointType p = cloud.points[i];
+          pcl::for_each_type<FieldList> (pcl::CopyIfFieldExists<typename CloudT::PointType, float> (p, "x_normal", has_x_normal, x_normal_val));
+          pcl::for_each_type<FieldList> (pcl::CopyIfFieldExists<typename CloudT::PointType, float> (p, "y_normal", has_y_normal, y_normal_val));
+          pcl::for_each_type<FieldList> (pcl::CopyIfFieldExists<typename CloudT::PointType, float> (p, "z_normal", has_z_normal, z_normal_val));
+          float normal[3] = {x_normal_val, y_normal_val, z_normal_val};
+          normals->SetTupleValue(pointId, normal);
+        }
+        else
+        {
+
+        }
+      }
+    }
+
+    structuredGrid->GetPointData()->SetNormals(normals);
+  }
+
+  // Colors (optional)
+  bool has_r = false; bool has_g = false; bool has_b = false;
+  unsigned char r_val = 0; unsigned char g_val = 0; unsigned char b_val = 0;
+  pcl::for_each_type<FieldList> (pcl::CopyIfFieldExists<typename CloudT::PointType, unsigned char> (testPoint, "r", has_r, r_val));
+  pcl::for_each_type<FieldList> (pcl::CopyIfFieldExists<typename CloudT::PointType, unsigned char> (testPoint, "g", has_g, g_val));
+  pcl::for_each_type<FieldList> (pcl::CopyIfFieldExists<typename CloudT::PointType, unsigned char> (testPoint, "b", has_b, b_val));
+  if(has_r && has_g && has_b)
+  {
+    vtkSmartPointer<vtkUnsignedCharArray> colors = vtkSmartPointer<vtkUnsignedCharArray>::New();
+    colors->SetNumberOfComponents(3); // Note this must come before the SetNumberOfTuples calls
+    colors->SetNumberOfTuples(cloud.width * cloud.height);
+    colors->SetName("Colors");
+    for (size_t i = 0; i < cloud.width; ++i)
+    {
+      for (size_t j = 0; j < cloud.height; ++j)
+      {
+        int queryPoint[3] = {i, j, 0};
+        vtkIdType pointId = vtkStructuredData::ComputePointId(dimensions, queryPoint);
+        typename CloudT::PointType point = cloud(i,j);
+
+        if(pcl::isFinite(point))
+        {
+          typename CloudT::PointType p = cloud[i];
+          pcl::for_each_type<FieldList> (pcl::CopyIfFieldExists<typename CloudT::PointType, unsigned char> (p, "r", has_r, r_val));
+          pcl::for_each_type<FieldList> (pcl::CopyIfFieldExists<typename CloudT::PointType, unsigned char> (p, "g", has_g, g_val));
+          pcl::for_each_type<FieldList> (pcl::CopyIfFieldExists<typename CloudT::PointType, unsigned char> (p, "b", has_b, b_val));
+          unsigned char color[3] = {r_val, g_val, b_val};
+          colors->SetTupleValue(i, color);
+        }
+        else
+        {
+
+        }
+      }
+    }
+    structuredGrid->GetPointData()->AddArray(colors);
+  }
+  
+  std::cout << "There were " << numberOfInvalidPoints << " invalid points." << std::endl;
 
 }
 

@@ -30,8 +30,7 @@ int main (int argc, char*argv[])
   std::cout << "Reading " << inputFileName << " and writing " << outputFileName << std::endl;
   
   // Read the PCD file
-  //typedef pcl::PointCloud<pcl::PointXYZ> CloudType;
-  typedef CloudPointXYZRGBNormalType CloudType;
+  typedef pcl::PointCloud<pcl::PointXYZ> CloudType;
 
   CloudType::Ptr cloud (new CloudType);
 
@@ -44,7 +43,7 @@ int main (int argc, char*argv[])
   // Create a polydata object and add the points to it.
   vtkSmartPointer<vtkStructuredGrid> structuredGrid = vtkSmartPointer<vtkStructuredGrid>::New();
 
-  PCLtoVTK(cloud.get(), structuredGrid.GetPointer());
+  PCLtoVTK(*cloud, structuredGrid.GetPointer());
   
   std::cout << "Input cloud has " << cloud->width * cloud->height << " points." << std::endl;
   std::cout << "Output cloud has " << structuredGrid->GetNumberOfPoints() << " points." << std::endl;

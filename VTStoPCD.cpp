@@ -36,7 +36,7 @@ int main (int argc, char** argv)
   typedef pcl::PointCloud<pcl::PointXYZRGBNormal> CloudType;
   CloudType::Ptr cloud(new CloudType);
 
-  VTKtoPCL(reader->GetOutput(), cloud.get());
+  VTKtoPCL(reader->GetOutput(), *cloud);
 
   pcl::io::savePCDFileASCII (outputPCD.c_str(), *cloud);
 

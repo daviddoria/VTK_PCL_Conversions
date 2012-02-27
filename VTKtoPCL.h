@@ -5,11 +5,13 @@
 class vtkPolyData;
 class vtkStructuredGrid;
 
+/** Convert a vtkPolyData to a pcl::PointCloud. */
 template <typename CloudT>
 void VTKtoPCL(vtkPolyData* const polydata, CloudT& cloud);
 
+/** Convert a vtkStructuredGrid to a pcl::PointCloud. */
 template <typename CloudT>
-void VTKtoPCL(vtkStructuredGrid* const structuredGrid, CloudT* const cloud);
+void VTKtoPCL(vtkStructuredGrid* const structuredGrid, CloudT& cloud);
 
 #include "VTKtoPCL.hpp"
 
