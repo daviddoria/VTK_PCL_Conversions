@@ -3,6 +3,7 @@
 
 // PCL
 #include <pcl/common/common.h>
+#include <pcl/point_traits.h>
 
 // VTK
 #include <vtkFloatArray.h>

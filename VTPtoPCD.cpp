@@ -34,7 +34,7 @@ int main (int argc, char** argv)
 
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud(new pcl::PointCloud<pcl::PointXYZ>);
 
-  VTKtoPCL(reader->GetOutput(), cloud.get());
+  VTKtoPCL(reader->GetOutput(), *cloud);
 
   pcl::io::savePCDFileASCII (outputPCD.c_str(), *cloud);
 

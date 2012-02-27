@@ -41,10 +41,10 @@ int main (int argc, char** argv)
   PCLtoVTK(*cloudXYZRGBNormal, polydata);
   PCLtoVTK(*cloudXYZNormal, polydata);
   
-  VTKtoPCL(polydata, cloudXYZRGB.get());
-  VTKtoPCL(polydata, cloudXYZ.get());
-  VTKtoPCL(polydata, cloudXYZRGBNormal.get());
-  VTKtoPCL(polydata, cloudXYZNormal.get());
+  VTKtoPCL(polydata, *cloudXYZRGB);
+  VTKtoPCL(polydata, *cloudXYZ);
+  VTKtoPCL(polydata, *cloudXYZRGBNormal);
+  VTKtoPCL(polydata, *cloudXYZNormal);
  
   return EXIT_SUCCESS;
 }
