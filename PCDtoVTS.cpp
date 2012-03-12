@@ -52,7 +52,8 @@ int main (int argc, char*argv[])
   vtkSmartPointer<vtkXMLStructuredGridWriter> writer =
     vtkSmartPointer<vtkXMLStructuredGridWriter>::New();
   writer->SetFileName(outputFileName.c_str());
-  writer->SetInputConnection(structuredGrid->GetProducerPort());
+  //writer->SetInputConnection(structuredGrid->GetProducerPort());
+  writer->SetInputData(structuredGrid);
   writer->Write();
 
   std::cout << "Finished." << std::endl;

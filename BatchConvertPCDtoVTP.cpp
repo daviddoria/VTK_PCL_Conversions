@@ -53,7 +53,8 @@ int main (int argc, char*argv[])
     outputFileName += ".vtp";
 
     writer->SetFileName(outputFileName.c_str());
-    writer->SetInputConnection(polydata->GetProducerPort());
+    //writer->SetInputConnection(polydata->GetProducerPort());
+    writer->SetInputData(polydata);
     writer->Write();
   }
   

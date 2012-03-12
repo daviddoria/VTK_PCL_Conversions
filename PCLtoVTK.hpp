@@ -89,7 +89,8 @@ void PCLtoVTK(const CloudT& cloud, vtkPolyData* const pdata)
 
   // Add 0D topology to every point
   vtkSmartPointer<vtkVertexGlyphFilter> vertexGlyphFilter = vtkSmartPointer<vtkVertexGlyphFilter>::New();
-  vertexGlyphFilter->AddInputConnection(tempPolyData->GetProducerPort());
+  //vertexGlyphFilter->AddInputConnection(tempPolyData->GetProducerPort());
+  vertexGlyphFilter->SetInputData(tempPolyData);
   vertexGlyphFilter->Update();
 
   pdata->DeepCopy(vertexGlyphFilter->GetOutput());

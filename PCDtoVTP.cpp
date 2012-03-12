@@ -48,7 +48,8 @@ int main (int argc, char*argv[])
   vtkSmartPointer<vtkXMLPolyDataWriter> writer =
     vtkSmartPointer<vtkXMLPolyDataWriter>::New();
   writer->SetFileName(outputFileName.c_str());
-  writer->SetInputConnection(polydata->GetProducerPort());
+  //writer->SetInputConnection(polydata->GetProducerPort());
+  writer->SetInputData(polydata);
   writer->Write();
   
   return EXIT_SUCCESS;

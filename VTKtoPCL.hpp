@@ -100,7 +100,7 @@ void VTKtoPCL(vtkPolyData* const polydata, CloudT& cloud)
                                                                                             "b", has_b, b_val));
 
   vtkUnsignedCharArray* colors =
-    vtkUnsignedCharArray::SafeDownCast(polydata->GetPointData()->GetNormals());
+    vtkUnsignedCharArray::SafeDownCast(polydata->GetPointData()->GetScalars());
   if(has_r && has_g && has_b && colors)
   {
     for (size_t i = 0; i < cloud.points.size (); ++i)
