@@ -8,6 +8,9 @@ PROJECT(VTKPCLConversions)
 ######### Libraries #########
 # VTK
 FIND_PACKAGE(VTK REQUIRED)
+if( "${VTK_MAJOR_VERSION}" LESS 6 )
+  MESSAGE(FATAL_ERROR "You must build this code with VTK >= 6.0!")
+endif( "${VTK_MAJOR_VERSION}" LESS 6 )
 
 # PCL
 FIND_PACKAGE(PCL 1.1 REQUIRED)
